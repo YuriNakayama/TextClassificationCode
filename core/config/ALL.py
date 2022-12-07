@@ -13,6 +13,9 @@ config = {
         "kmeans": {
             "max_model_num": 2,
         },
+        "LDA": {
+            "max_model_num": 2,
+        },
     },
 }
 
