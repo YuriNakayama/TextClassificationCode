@@ -21,5 +21,6 @@ scikit_learn_data
 .ipynb_checkpoints
 .cache
 .ipython
+.env
 
 work/mecab-ipadic-neologd
