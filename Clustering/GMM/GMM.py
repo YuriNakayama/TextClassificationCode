@@ -64,31 +64,31 @@ def getGMM(vectors, n_components, covariance_type, seed, path):
     pred = gmm.predict(vectors)
     return pred
 
+print("begin {sys.argv[0]}")
+vectors_path = f"../data/{data_type}/{vectorize_type}/vector"
+models_path = f"../data/{data_type}/{vectorize_type}/GMM/model"
+pred_path = f"../data/{data_type}/{vectorize_type}/GMM/pred"
+for vector_model_num in range(max_vector_model_num):
+    for vector_dim in tqdm(vector_dims):
+        for model_num in range(model_nums):
+            for covariance_type in covariance_types:
+                vectors = np.load(f"{vectors_path}/{vector_dim}/{normalization}/{vector_model_num}.npy")
 
-# vectors_path = f"../data/{data_type}/{vectorize_type}/vector"
-# models_path = f"../data/{data_type}/{vectorize_type}/GMM/model"
-# pred_path = f"../data/{data_type}/{vectorize_type}/GMM/pred"
-# for vector_model_num in range(max_vector_model_num):
-#     for vector_dim in tqdm(vector_dims):
-#         for model_num in range(model_nums):
-#             for covariance_type in covariance_types:
-#                 vectors = np.load(f"{vectors_path}/{vector_dim}/{normalization}/{vector_model_num}.npy")
+                pred = getGMM(
+                    vectors,
+                    seed=model_num,
+                    n_components=n_components,
+                    covariance_type=covariance_type,
+                    path=f"{models_path}/{vector_dim}/{normalization}/{covariance_type}/{model_num}.sav",
+                )
 
-#                 pred = getGMM(
-#                     vectors,
-#                     seed=model_num,
-#                     n_components=n_components,
-#                     covariance_type=covariance_type,
-#                     path=f"{models_path}/{vector_dim}/{normalization}/{covariance_type}/{model_num}.sav",
-#                 )
-
-#                 # save prediction
-#                 np.save(
-#                     make_filepath(
-#                         f"{pred_path}/{vector_dim}/{normalization}/{covariance_type}/{model_num}.npy"
-#                     ),
-#                     pred,
-#                 )
+                # save prediction
+                np.save(
+                    make_filepath(
+                        f"{pred_path}/{vector_dim}/{normalization}/{covariance_type}/{model_num}.npy"
+                    ),
+                    pred,
+                )
 
 send_line_notify(f"{sys.argv[0]} {data_type} {vectorize_type}")
 
