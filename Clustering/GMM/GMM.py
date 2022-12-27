@@ -40,7 +40,8 @@ with open(f"../../Preprocessing/data/{data_type}/class.csv", mode="r") as f:
     class_labels = [label for label in reader]
 
 max_vector_model_num = config["vectorize"][vectorize_type]["max_model_num"]
-vector_dims = config["vectorize"][vectorize_type]["dims"]
+# vector_dims = config["vectorize"][vectorize_type]["dims"]
+vector_dims = [384]
 normalization = config["vectorize"][vectorize_type]["normalization"]
 model_nums = config["clustering"]["gmm"]["max_model_num"]
 covariance_types = config["clustering"]["gmm"]["covariance_types"]
@@ -64,7 +65,6 @@ def getGMM(vectors, n_components, covariance_type, seed, path):
     pred = gmm.predict(vectors)
     return pred
 
-print("begin {sys.argv[0]}")
 vectors_path = f"../data/{data_type}/{vectorize_type}/vector"
 models_path = f"../data/{data_type}/{vectorize_type}/GMM/model"
 pred_path = f"../data/{data_type}/{vectorize_type}/GMM/pred"
