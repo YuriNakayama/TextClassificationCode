@@ -1,7 +1,16 @@
 # # Import
 
+# +
 import os
 import sys
+
+import requests
+from dotenv import load_dotenv
+# -
+
+# # Load envs
+
+load_dotenv()
 
 
 # # Function
@@ -35,3 +44,18 @@ def get_describe(df, axis=0):
     }
     keys = describe.keys()
     return describe, keys
+
+
+def send_line_notify(notification_message):
+    """
+    LINEに通知する
+    """
+    line_notify_token = os.getenv("LINE_NOTIFY_TOKEN")
+    line_notify_api = "https://notify-api.line.me/api/notify"
+    headers = {"Authorization": f"Bearer {line_notify_token}"}
+    data = {
+        "message": f"{os.path.basename(os.getcwd())}: {notification_message}"
+    }
+    requests.post(line_notify_api, headers=headers, data=data)
+
+
