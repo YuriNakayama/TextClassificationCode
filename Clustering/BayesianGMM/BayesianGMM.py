@@ -40,8 +40,8 @@ with open(f"../../Preprocessing/data/{data_type}/class.csv", mode="r") as f:
     class_labels = [label for label in reader]
 
 max_vector_model_num = config["vectorize"][vectorize_type]["max_model_num"]
-vector_dims = config["vectorize"][vectorize_type]["dims"]
-# vector_dims = [384]
+# vector_dims = config["vectorize"][vectorize_type]["dims"]
+vector_dims = [384]
 # normalization = config["vectorize"][vectorize_type]["normalization"]
 normalization = "normalized"
 model_nums = config["clustering"]["gmm"]["max_model_num"]
@@ -70,8 +70,8 @@ vectors_path = f"../data/{data_type}/{vectorize_type}/vector"
 models_path = f"../data/{data_type}/{vectorize_type}/GMM/model"
 pred_path = f"../data/{data_type}/{vectorize_type}/GMM/pred"
 for vector_model_num in range(max_vector_model_num):
-    for vector_dim in tqdm(vector_dims):
-        for model_num in range(model_nums):
+    for vector_dim in vector_dims:
+        for model_num in tqdm(range(model_nums)):
             for covariance_type in covariance_types:
                 vectors = np.load(f"{vectors_path}/{vector_dim}/{normalization}/{vector_model_num}.npy")
 

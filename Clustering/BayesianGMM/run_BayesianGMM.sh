@@ -1,8 +1,9 @@
 data_types=(
     "AgNews" 
     "20News" 
+    "AgNewsTitle"
     )
-vectorize_types=("doc2vec")
+vectorize_types=("sentenceBERT")
 
 for data_type in ${data_types[@]}; do
     for vectorize_type in ${vectorize_types}; do
