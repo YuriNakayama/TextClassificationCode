@@ -3,6 +3,7 @@
 # +
 import os
 import sys
+import copy
 
 import requests
 from dotenv import load_dotenv
@@ -57,5 +58,18 @@ def send_line_notify(notification_message):
         "message": f"{os.path.basename(os.getcwd())}: {notification_message}"
     }
     requests.post(line_notify_api, headers=headers, data=data)
+
+
+def make_multilayer_dict(keys: list):
+    def _multilayer_dict_recursive(d: dict, keys: list):
+        if not keys:
+            return d, []
+        else:
+            return _multilayer_dict_recursive(
+                {key: copy.deepcopy(d) for key in keys[-1]}, keys[:-1]
+            )
+
+    multilayer_dict, _ = _multilayer_dict_recursive(dict(), keys)
+    return multilayer_dict
 
 
