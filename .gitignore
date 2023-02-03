@@ -1,18 +1,19 @@
-*.zip
 *.csv
-*.png
 *.jpeg
-*.pdf
+*.jpg
 *.json
 *.txt
-*.jpg
+*.pdf
 *.pickle
+*.png
 *.xml
+*.zip
 
 .bash_history
 .cache
 .config
 .DS_Store
+.env
 .gitconfig
 .ipynb_checkpoints
 .ipython
@@ -26,8 +27,6 @@ models
 past
 nltk_data
 scikit_learn_data
-
-.env
 
 work/mecab-ipadic-neologd
 
