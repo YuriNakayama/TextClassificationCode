@@ -44,7 +44,7 @@ df = pd.read_csv(f"../Preprocessing/data/{data_type}/master.csv", index_col=0)
 class_num = config["data"][data_type]["class_num"]
 texts = df.words_nonstop.tolist()
 # vectorize texts
-vec = CountVectorizer(stop_words="english", max_df=0.5, min_df=200)
+vec = CountVectorizer(stop_words="english", max_df=0.5, min_df=0.03)
 X = vec.fit_transform(texts).toarray()
 
 # get vocabulary
@@ -73,9 +73,7 @@ adjusted_mutual_info_score(pred, df["class"].to_numpy())
 
 send_line_notify(f"biterm")
 
-
-
-
+adjusted_mutual_info_score(pred, df["class"].to_numpy())
 
 
 

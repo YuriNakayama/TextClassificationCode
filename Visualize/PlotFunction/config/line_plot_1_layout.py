@@ -1,5 +1,5 @@
 layout = {
-    "figure": {"figsize": (8, 8)},
+    "figure": {"figsize": (12, 12)},
     "label": {"fontsize": 20, "labelpad": 21, "fontweight": "black"},
     "ticks": {
         "axis": "both",
