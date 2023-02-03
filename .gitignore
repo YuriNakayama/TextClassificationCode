@@ -9,18 +9,24 @@
 *.pickle
 *.xml
 
+.bash_history
+.cache
+.config
+.DS_Store
+.gitconfig
+.ipynb_checkpoints
+.ipython
+.jupyter
+.local
+.ssh
+.vscode-server
+
 data
 models
 past
 nltk_data
 scikit_learn_data
 
-.DS_Store
-.jupyter/
-.local/
-.ipynb_checkpoints
-.cache
-.ipython
 .env
 
 work/mecab-ipadic-neologd
