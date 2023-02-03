@@ -30,3 +30,5 @@ scikit_learn_data
 .env
 
 work/mecab-ipadic-neologd
+
+!requirements.txt
