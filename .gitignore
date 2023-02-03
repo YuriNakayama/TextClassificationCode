@@ -12,6 +12,7 @@
 .bash_history
 .cache
 .config
+.dotnet
 .DS_Store
 .env
 .gitconfig

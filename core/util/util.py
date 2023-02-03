@@ -4,20 +4,19 @@
 import copy
 import itertools
 import os
-import sys
-from collections import Counter
 
 import requests
 from dotenv import load_dotenv
 from sympy.combinatorics import Permutation
+
 # -
 
 # # Load envs
 
 load_dotenv()
 
-
 # # Function
+
 
 def make_filepath(path):
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -57,9 +56,7 @@ def send_line_notify(notification_message):
     line_notify_token = os.getenv("LINE_NOTIFY_TOKEN")
     line_notify_api = "https://notify-api.line.me/api/notify"
     headers = {"Authorization": f"Bearer {line_notify_token}"}
-    data = {
-        "message": f"{os.path.basename(os.getcwd())}: {notification_message}"
-    }
+    data = {"message": f"{os.path.basename(os.getcwd())}: {notification_message}"}
     requests.post(line_notify_api, headers=headers, data=data)
 
 
@@ -131,9 +128,8 @@ def swap_keys(old_multi_dict, new_names: list):
         return _cycles
 
     if not (set(new_names) == set(old_multi_dict.names)):
-        raise KeyError(
-            f"Keys {set(new_names).symmetric_difference(self.keys)} do not match."
-        )
+        diff = set(new_names).symmetric_difference(set(old_multi_dict.names))
+        raise KeyError(f"Keys {diff} do not match.")
 
     _two_row_perm = index_to_num([old_multi_dict.names, new_names])
     _cyclic_perm = lists_to_permutation(_two_row_perm)
@@ -149,5 +145,3 @@ def swap_keys(old_multi_dict, new_names: list):
     for _index_keys in itertools.product(*old_multi_dict.names_keys.values()):
         _new_multilayer_dict.update(_perm(_index_keys), old_multi_dict.loc(_index_keys))
     return _new_multilayer_dict
-
-
