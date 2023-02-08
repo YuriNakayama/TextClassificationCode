@@ -1,17 +1,23 @@
 *.csv
 *.jpeg
 *.jpg
+*.jpg
 *.json
 *.txt
 *.pdf
+*.pdf
 *.pickle
+*.png
 *.png
 *.xml
 *.zip
+*.model
+*.npy
 
 .bash_history
 .cache
 .config
+.dotnet
 .DS_Store
 .env
 .gitconfig
@@ -22,12 +28,18 @@
 .ssh
 .vscode-server
 
+
 data
 models
-past
 nltk_data
+past
 scikit_learn_data
+temporary
+tmp
+
+
 
 work/mecab-ipadic-neologd
 
+!requirements.txt
 !requirements.txt

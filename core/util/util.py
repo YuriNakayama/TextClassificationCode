@@ -1,13 +1,15 @@
 # # Import
 
 # +
-import copy
-import itertools
+import logging
 import os
+import shutil
 import sys
-from collections import Counter
+from typing import List
 
+import boto3
 import requests
+from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 from sympy.combinatorics import Permutation
 # -
@@ -16,13 +18,20 @@ from sympy.combinatorics import Permutation
 
 load_dotenv()
 
+s3_bucket_name =  "text-classification-nakayama-bucket"
+root_path = "/home/jovyan/"
 
 # # Function
+
+
+# ## file function
 
 def make_filepath(path):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     return path
 
+
+# ## statistics function
 
 def get_describe(df, axis=0):
     """
@@ -50,6 +59,8 @@ def get_describe(df, axis=0):
     return describe, keys
 
 
+# ## notification
+
 def send_line_notify(notification_message):
     """
     LINEに通知する
@@ -57,97 +68,159 @@ def send_line_notify(notification_message):
     line_notify_token = os.getenv("LINE_NOTIFY_TOKEN")
     line_notify_api = "https://notify-api.line.me/api/notify"
     headers = {"Authorization": f"Bearer {line_notify_token}"}
-    data = {
-        "message": f"{os.path.basename(os.getcwd())}: {notification_message}"
-    }
+    data = {"message": f"{os.path.basename(os.getcwd())}: {notification_message}"}
     requests.post(line_notify_api, headers=headers, data=data)
 
 
-class multilayer_dict:
-    def __init__(self, names_keys: dict):
-        self.dict = self.make_multilayer_dict(list(names_keys.values()))
-        self.names = list(names_keys.keys())
-        self.names_keys = names_keys
+# ## S3
 
-    def make_multilayer_dict(self, keys: list):
-        def _multilayer_dict_recursive(_d: dict, _keys: list):
-            if not _keys:
-                return _d, []
+class S3Manager:
+    def __init__(self):
+        self.files = {data_type: {} for data_type in ["upload", "download"]}
+
+    def upload(
+        self, file_path, object_name=None, bucket=s3_bucket_name, save_file=False
+    ):
+        """Upload a file to an S3 bucket
+
+        :param file_path: File to upload
+        :param object_name: S3 object name. If not specified then file_path is used
+        :param bucket: Bucket to upload to. If not specified then default s3_bucket_name is used
+        :param save_file: determine save file or not. If not specified then the uploaded file will not be saved.
+        :return: file_name if file was uploaded, else False
+        """
+
+        def _upload_dir(_dir_path, _object_name, _bucket):
+            for _root, _, _files in os.walk(_dir_path, topdown=False):
+                if _files:
+                    _root_path = _root.replace(_dir_path, _object_name)
+                    _file_paths = [os.path.join(_root, _file) for _file in _files]
+                    _objects = [os.path.join(_root_path, _file) for _file in _files]
+                    for _object, _file_path in zip(_objects, _file_paths):
+                        _s3_client.upload_file(_file_path, bucket, _object)
+
+        # If S3 object_name was not specified, use file_path
+        if object_name is None:
+            object_name = os.path.basename(file_path)
+
+        # Upload the file
+        _s3_client = boto3.client("s3")
+        try:
+            if os.path.isfile(file_path):
+                _response = _s3_client.upload_file(file_path, bucket, object_name)
             else:
-                return _multilayer_dict_recursive(
-                    {_key: copy.deepcopy(_d) for _key in _keys[-1]}, _keys[:-1]
+                _upload_dir(file_path, object_name, bucket)
+        except ClientError as e:
+            logging.error(e)
+            return False
+        self.files["upload"][file_path] = save_file
+        return file_path
+
+    def download(
+        self,
+        object_name,
+        file_path=None,
+        s3_bucket_name=s3_bucket_name,
+        save_file=False,
+    ):
+        """Download a file to an S3 bucket
+
+        :param bucket: Bucket to download to
+        :param file_path: File to download
+        :param object_name: S3 object name. If not specified then file_path is used
+        :param save_file: determine save file or not. If not specified then the uploaded file will not be saved.
+        :return: True if file was uploaded, else False
+        """
+        _s3 = boto3.client("s3")
+        try:
+            _objects = self.ls(s3_bucket_name, object_name, recursive=True)
+            if file_path is None:
+                for _object in _objects:
+                    _file_path = make_filepath(f"{root_path}/temporary/{_object}")
+                    _s3.download_file(s3_bucket_name, _object, _file_path)
+            else:
+                for _object in _objects:
+                    _object = _object.replace(object_name, file_path)
+                    _file_path = make_filepath(_object)
+                    _s3.download_file(s3_bucket_name, _object, _file_path)
+        except ClientError as e:
+            logging.error(e)
+            return False
+        self.files["download"][file_path] = save_file
+        return file_path
+
+    def ls(self, bucket: str, prefix: str, recursive: bool = False) -> List[str]:
+        """S3上のファイルリスト取得
+
+        Args:
+            bucket (str): バケット名
+            prefix (str): バケット以降のパス
+            recursive (bool): 再帰的にパスを取得するかどうか
+
+        """
+        paths: List[str] = []
+        paths = self.__get_all_keys(bucket, prefix, recursive=recursive)
+        return paths
+
+    def __get_all_keys(
+        self,
+        bucket: str,
+        prefix: str,
+        keys: List = None,
+        marker: str = "",
+        recursive: bool = False,
+    ) -> List[str]:
+        """指定した prefix のすべての key の配列を返す
+
+        Args:
+            bucket (str): バケット名
+            prefix (str): バケット以降のパス
+            keys (List): 全パス取得用に用いる
+            marker (str): 全パス取得用に用いる
+            recursive (bool): 再帰的にパスを取得するかどうか
+
+        """
+        s3 = boto3.client("s3")
+        if recursive:
+            response = s3.list_objects(Bucket=bucket, Prefix=prefix, Marker=marker)
+        else:
+            response = s3.list_objects(
+                Bucket=bucket, Prefix=prefix, Marker=marker, Delimiter="/"
+            )
+
+        # keyがNoneのときは初期化
+        if keys is None:
+            keys = []
+
+        if "CommonPrefixes" in response:
+            # Delimiterが'/'のときはフォルダがKeyに含まれない
+            keys.extend([content["Prefix"] for content in response["CommonPrefixes"]])
+        if "Contents" in response:  # 該当する key がないと response に 'Contents' が含まれない
+            keys.extend([content["Key"] for content in response["Contents"]])
+            if "IsTruncated" in response:
+                return self.__get_all_keys(
+                    bucket=bucket,
+                    prefix=prefix,
+                    keys=keys,
+                    marker=keys[-1],
+                    recursive=recursive,
                 )
+        return keys
 
-        _multilayer_dict, _ = _multilayer_dict_recursive(dict(), keys)
-        return _multilayer_dict
-
-    def name_is_in(self, name):
-        return name in self.name
-
-    def loc(self, key_list: list):
-        def _loc_recursive(_val, _key_list: list):
-            if not _key_list:
-                return _val
+    def delete_local_all(self):
+        def _delete_file_or_folder(_path):
+            if os.path.exists(_path):
+                if os.path.isfile(_path):
+                    os.remove(_path)
+                else:
+                    shutil.rmtree(_path)
+                return True
             else:
-                return _loc_recursive(_val[_key_list[0]], _key_list[1:])
+                return False
 
-        return _loc_recursive(self.dict, key_list)
-
-    def update(self, key_list: list, val):
-        _d = self.dict
-        for key in key_list[:-1]:
-            _d = _d[key]
-        _d[key_list[-1]] = val
-
-
-# 外部関数にした方がいい
-def swap_keys(old_multi_dict, new_names: list):
-    def index_to_num(index_lists):
-        def _make_index_list(_index_list):
-            return {_index: _num for _num, _index in enumerate(_index_list)}
-
-        _perm_dict = _make_index_list(index_lists[0])
-        return [
-            [_perm_dict[_index] for _index in _index_list]
-            for _index_list in index_lists
-        ]
-
-    def lists_to_permutation(two_row_perm: list):
-        if set(two_row_perm[0]) != set(two_row_perm[1]):
-            raise ValueError("Permutations do not match.")
-        _two_row_perm = dict(zip(*two_row_perm))
-        _cycles = []
-        _done = set()
-        for _i in _two_row_perm.keys():
-            if _i not in _done:
-                _cycle = [_i]
-                _next_elem = _two_row_perm[_i]
-                _done.add(_next_elem)
-                while _next_elem != _i:
-                    _cycle.append(_next_elem)
-                    _next_elem = _two_row_perm[_next_elem]
-                    _done.add(_next_elem)
-                _cycles.append(_cycle)
-        return _cycles
-
-    if not (set(new_names) == set(old_multi_dict.names)):
-        raise KeyError(
-            f"Keys {set(new_names).symmetric_difference(self.keys)} do not match."
-        )
-
-    _two_row_perm = index_to_num([old_multi_dict.names, new_names])
-    _cyclic_perm = lists_to_permutation(_two_row_perm)
-    _perm = Permutation(_cyclic_perm)
-
-    _new_keys_names = dict(
-        zip(
-            _perm(list(old_multi_dict.names_keys.keys())),
-            _perm(list(old_multi_dict.names_keys.values())),
-        )
-    )
-    _new_multilayer_dict = multilayer_dict(_new_keys_names)
-    for _index_keys in itertools.product(*old_multi_dict.names_keys.values()):
-        _new_multilayer_dict.update(_perm(_index_keys), old_multi_dict.loc(_index_keys))
-    return _new_multilayer_dict
-
-
+        for _type, _file_dict in self.files.items():
+            if _file_dict:
+                for _file, _save in _file_dict.items():
+                    if not _save:
+                        _delete_file_or_folder(_file)
+                        print(_file)
