@@ -11,6 +11,7 @@ import boto3
 import requests
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
+from sympy.combinatorics import Permutation
 # -
 
 # # Load envs
