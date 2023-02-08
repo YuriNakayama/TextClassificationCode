@@ -8,6 +8,8 @@
 *.png
 *.xml
 *.zip
+*.model
+*.npy
 
 .bash_history
 .cache
@@ -23,11 +25,15 @@
 .ssh
 .vscode-server
 
+
 data
 models
-past
 nltk_data
+past
 scikit_learn_data
+temporary
+
+
 
 work/mecab-ipadic-neologd
 

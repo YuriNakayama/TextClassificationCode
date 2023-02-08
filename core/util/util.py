@@ -116,7 +116,11 @@ class S3Manager:
         return file_path
 
     def download(
-        self, object_name, file_path=None, s3_bucket_name=s3_bucket_name, save_file=False
+        self,
+        object_name,
+        file_path=None,
+        s3_bucket_name=s3_bucket_name,
+        save_file=False,
     ):
         """Download a file to an S3 bucket
 
@@ -126,19 +130,81 @@ class S3Manager:
         :param save_file: determine save file or not. If not specified then the uploaded file will not be saved.
         :return: True if file was uploaded, else False
         """
-
-        # If S3 object_name was not specified, use temporary folder
-        if file_path is None:
-            file_path = make_filepath(f"{root_path}/temporary/{object_name}")
-
         _s3 = boto3.client("s3")
         try:
-            _s3.download_file(s3_bucket_name, object_name, file_path)
+            _objects = self.ls(s3_bucket_name, object_name, recursive=True)
+            if file_path is None:
+                for _object in _objects:
+                    _file_path = make_filepath(f"{root_path}/temporary/{_object}")
+                    _s3.download_file(s3_bucket_name, _object, _file_path)
+            else:
+                for _object in _objects:
+                    _object = _object.replace(object_name, file_path)
+                    _file_path = make_filepath(_object)
+                    _s3.download_file(s3_bucket_name, _object, _file_path)
         except ClientError as e:
             logging.error(e)
             return False
         self.files["download"][file_path] = save_file
         return file_path
+
+    def ls(self, bucket: str, prefix: str, recursive: bool = False) -> List[str]:
+        """S3上のファイルリスト取得
+
+        Args:
+            bucket (str): バケット名
+            prefix (str): バケット以降のパス
+            recursive (bool): 再帰的にパスを取得するかどうか
+
+        """
+        paths: List[str] = []
+        paths = self.__get_all_keys(bucket, prefix, recursive=recursive)
+        return paths
+
+    def __get_all_keys(
+        self,
+        bucket: str,
+        prefix: str,
+        keys: List = None,
+        marker: str = "",
+        recursive: bool = False,
+    ) -> List[str]:
+        """指定した prefix のすべての key の配列を返す
+
+        Args:
+            bucket (str): バケット名
+            prefix (str): バケット以降のパス
+            keys (List): 全パス取得用に用いる
+            marker (str): 全パス取得用に用いる
+            recursive (bool): 再帰的にパスを取得するかどうか
+
+        """
+        s3 = boto3.client("s3")
+        if recursive:
+            response = s3.list_objects(Bucket=bucket, Prefix=prefix, Marker=marker)
+        else:
+            response = s3.list_objects(
+                Bucket=bucket, Prefix=prefix, Marker=marker, Delimiter="/"
+            )
+
+        # keyがNoneのときは初期化
+        if keys is None:
+            keys = []
+
+        if "CommonPrefixes" in response:
+            # Delimiterが'/'のときはフォルダがKeyに含まれない
+            keys.extend([content["Prefix"] for content in response["CommonPrefixes"]])
+        if "Contents" in response:  # 該当する key がないと response に 'Contents' が含まれない
+            keys.extend([content["Key"] for content in response["Contents"]])
+            if "IsTruncated" in response:
+                return self.__get_all_keys(
+                    bucket=bucket,
+                    prefix=prefix,
+                    keys=keys,
+                    marker=keys[-1],
+                    recursive=recursive,
+                )
+        return keys
 
     def delete_local_all(self):
         def _delete_file_or_folder(_path):
