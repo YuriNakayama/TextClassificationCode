@@ -11,7 +11,6 @@ import boto3
 import requests
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
-from sympy.combinatorics import Permutation
 # -
 
 # # Load envs
@@ -19,7 +18,7 @@ from sympy.combinatorics import Permutation
 load_dotenv()
 
 s3_bucket_name =  "text-classification-nakayama-bucket"
-root_path = "/home/jovyan/"
+root_path = "/home/jovyan"
 
 # # Function
 
@@ -134,20 +133,24 @@ class S3Manager:
         _s3 = boto3.client("s3")
         try:
             _objects = self.ls(s3_bucket_name, object_name, recursive=True)
+            _file_path_return = []
             if file_path is None:
                 for _object in _objects:
                     _file_path = make_filepath(f"{root_path}/temporary/{_object}")
+                    _file_path_return.append(_file_path)
                     _s3.download_file(s3_bucket_name, _object, _file_path)
+                    self.files["download"][_file_path] = save_file
             else:
                 for _object in _objects:
-                    _object = _object.replace(object_name, file_path)
-                    _file_path = make_filepath(_object)
+                    _file_path = make_filepath(_object.replace(object_name, file_path))
+                    _file_path_return.append(_file_path)
                     _s3.download_file(s3_bucket_name, _object, _file_path)
+                    self.files["download"][_file_path] = save_file
+
         except ClientError as e:
             logging.error(e)
             return False
-        self.files["download"][file_path] = save_file
-        return file_path
+        return _file_path_return
 
     def ls(self, bucket: str, prefix: str, recursive: bool = False) -> List[str]:
         """S3上のファイルリスト取得
