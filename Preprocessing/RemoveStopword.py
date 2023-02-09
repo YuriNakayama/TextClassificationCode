@@ -45,9 +45,6 @@ with open(labels_path[0], mode="r") as f:
 
 # # Word tokenize
 
-download('punkt')
-download("stopwords")
-
 df["words"] = df.text.progress_apply(word_tokenize)
 
 # # Remove long text
@@ -90,7 +87,5 @@ df.to_csv(make_filepath(f"../../temporary/DataShaping/{data_type}/master.csv"))
 s3.upload(f"../../temporary/Preprocessing/{data_type}", f"DataShaping/{data_type}/")
 
 s3.delete_local_all()
-
-shutil.rmtree("../../nltk_data/")
 
 
