@@ -29,7 +29,7 @@ pd.set_option("display.max_rows", 50)
 
 s3 = S3Manager()
 
-data_type = "20NewsSampled128"
+data_type=sys.argv[1]
 
 # # Read data
 

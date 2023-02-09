@@ -4,20 +4,20 @@
 import logging
 import os
 import shutil
-import sys
 from typing import List
 
 import boto3
 import requests
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
+
 # -
 
 # # Load envs
 
 load_dotenv()
 
-s3_bucket_name =  "text-classification-nakayama-bucket"
+s3_bucket_name = "text-classification-nakayama-bucket"
 root_path = "/home/jovyan"
 
 # # Function
