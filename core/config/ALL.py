@@ -16,13 +16,25 @@ config = {
     "vectorize": {
         "doc2vec": {
             "max_model_num": 1,
-            "normalization": "normalized",
+            "normalization": ["normalized", "centralized"],
             "dims": [2, 4, 8, 16, 32, 64, 128, 256],
         },
         "sentenceBERT": {
-            "max_model_num": 1,
-            "normalization": "normalized",
-            "dims": [2, 4, 8, 16, 32, 64, 128, 256],
+            "sentence-transformers/all-MiniLM-L6-v2": {
+                "max_model_num": 1,
+                "normalization": ["normalized", "centralized"],
+                "dims": [2, 4, 8, 16, 32, 64, 128, 256, 384],
+            },
+            "sentence-transformers/all-mpnet-base-v2": {
+                "max_model_num": 1,
+                "normalization": ["normalized", "centralized"],
+                "dims": [2, 4, 8, 16, 32, 64, 128, 256, 768],
+            },
+            "sentence-transformers/all-distilroberta-v1": {
+                "max_model_num": 1,
+                "normalization": ["normalized", "centralized"],
+                "dims": [2, 4, 8, 16, 32, 64, 128, 256, 768],
+            },
         },
     },
     "clustering": {
@@ -38,6 +50,12 @@ config = {
         },
     },
 }
+
+# +
+{
+    
+}
+# -
 
 data_type_re = {
     "20News": r"^20News",

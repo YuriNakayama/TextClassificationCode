@@ -48,7 +48,7 @@ with open(labels_path[0], mode="r") as f:
     reader = csv.reader(f)
     class_labels = [label for label in reader]
 
-max_model_num = config["vectorize"]["sentenceBERT"]["max_model_num"]
+max_model_num = config["vectorize"]["sentenceBERT"][transformer_model]["max_model_num"]
 
 
 # # Embedding
@@ -61,8 +61,8 @@ def get_sentenceBERT(texts,seed, path):
 
 
 # +
-vectors_path = f"../../temporary/Vectorize/{data_type}/sentenceBERT/{transformer_model}/vector"
-models_path = f"../../temporary/Vectorize/{data_type}/sentenceBERT/{transformer_model}/model"
+vectors_path = f"/home/jovyan/temporary/Vectorize/{data_type}/sentenceBERT/{transformer_model}/vector"
+models_path = f"/home/jovyan/temporary/Vectorize/{data_type}/sentenceBERT/{transformer_model}/model"
 
 for model_num in tqdm(range(max_model_num)):
     vectors = get_sentenceBERT(
@@ -80,12 +80,12 @@ for model_num in tqdm(range(max_model_num)):
 # ## upload file
 
 s3.upload(
-    f"../../temporary/Vectorize/{data_type}/sentenceBERT/{transformer_model}/", 
+    f"/home/jovyan/temporary/Vectorize/{data_type}/sentenceBERT/{transformer_model}/", 
     f"Vectorize/{data_type}/sentenceBERT/{transformer_model}/"
 )
 
 s3.delete_local_all()
 
-send_line_notify(f"end {data_type} {transformer_model}")
+send_line_notify(f"end SBERT {data_type} {transformer_model}")
 
 

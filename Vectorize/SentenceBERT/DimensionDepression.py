@@ -47,29 +47,31 @@ with open(labels_path[0], mode="r") as f:
 
 s3.download(f"Vectorize/{data_type}/sentenceBERT/{transformer_model}")
 
-max_model_num = config["vectorize"]["sentenceBERT"]["max_model_num"]
-vector_dims = config["vectorize"]["sentenceBERT"]["dims"]
+max_model_num = config["vectorize"]["sentenceBERT"][transformer_model]["max_model_num"]
+vector_dims = config["vectorize"]["sentenceBERT"][transformer_model]["dims"]
 
 # # Dimension Depression
 
 # +
 vector_path = (
-    f"../../temporary/Vectorize/{data_type}/sentenceBERT/{transformer_model}/vector"
+    f"/home/jovyan/temporary/Vectorize/{data_type}/sentenceBERT/{transformer_model}/vector"
 )
 
-for vector_dim in tqdm(vector_dims):
-    for model_num in range(max_model_num):
-        vectors = np.load(
-            f"{vector_path}/raw/{model_num}.npy",
-        )
-        reduced_vectors = PCA(
-            n_components=vector_dim, random_state=model_num
-        ).fit_transform(vectors)
+for model_num in range(max_model_num):
+    vectors = np.load(
+        f"{vector_path}/raw/{model_num}.npy",
+    )
+    default_vector_dim = vectors.shape[1]
+    for vector_dim in tqdm(vector_dims):
+        if vector_dim < default_vector_dim:
+            reduced_vectors = PCA(
+                n_components=vector_dim, random_state=model_num
+            ).fit_transform(vectors)
 
-        np.save(
-            make_filepath(f"{vector_path}/pca/{vector_dim}/{model_num}.npy"),
-            reduced_vectors,
-        )
+            np.save(
+                make_filepath(f"{vector_path}/pca/{vector_dim}/{model_num}.npy"),
+                reduced_vectors,
+            )
 # -
 
 np.save(
@@ -77,20 +79,24 @@ np.save(
 )
 
 # +
-vector_path = f"../../temporary/Vectorize/{data_type}/sentenceBERT/{transformer_model}/vector"
+vector_path = (
+    f"/home/jovyan/temporary/Vectorize/{data_type}/sentenceBERT/{transformer_model}/vector"
+)
 
-for vector_dim in tqdm(vector_dims):
-    for model_num in range(max_model_num):
-        vectors = np.load(
-            f"{vector_path}/raw/{model_num}.npy",
-        )
-        reduced_vectors = umap.UMAP(
-            n_components=vector_dim, random_state=model_num
-        ).fit_transform(vectors)
-        np.save(
-            make_filepath(f"{vector_path}/umap/{vector_dim}/{model_num}.npy"),
-            reduced_vectors,
-        )
+for model_num in range(max_model_num):
+    vectors = np.load(
+        f"{vector_path}/raw/{model_num}.npy",
+    )
+    default_vector_dim = vectors.shape[1]
+    for vector_dim in tqdm(vector_dims):
+        if vector_dim < default_vector_dim:
+            reduced_vectors = umap.UMAP(
+                n_components=vector_dim, random_state=model_num
+            ).fit_transform(vectors)
+            np.save(
+                make_filepath(f"{vector_path}/umap/{vector_dim}/{model_num}.npy"),
+                reduced_vectors,
+            )
 # -
 
 np.save(
@@ -100,13 +106,13 @@ np.save(
 # ## upload file
 
 s3.upload(
-    f"../../temporary/Vectorize/{data_type}/sentenceBERT/{transformer_model}/vector", 
+    f"/home/jovyan/temporary/Vectorize/{data_type}/sentenceBERT/{transformer_model}/vector", 
     f"Vectorize/{data_type}/sentenceBERT/{transformer_model}/vector"
 )
 
 s3.delete_local_all()
 
-send_line_notify(f"end {data_type} sentenceBERT {transformer_model}")
+send_line_notify(f"end DimensionDepression.py {data_type} sentenceBERT {transformer_model}")
 
 
 
