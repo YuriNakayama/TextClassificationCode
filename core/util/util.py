@@ -19,6 +19,7 @@ load_dotenv()
 
 s3_bucket_name = "text-classification-nakayama-bucket"
 root_path = "/home/jovyan"
+root_path_temporary = "/home/jovyan/temporary/"
 
 # # Function
 
@@ -98,9 +99,9 @@ class S3Manager:
                     for _object, _file_path in zip(_objects, _file_paths):
                         _s3_client.upload_file(_file_path, bucket, _object)
 
-        # If S3 object_name was not specified, use file_path
+        # If S3 object_name was not specified, use subdirectry of "temporary" folder
         if object_name is None:
-            object_name = os.path.basename(file_path)
+            object_name = os.path.abspath(file_path).replace(root_path_temporary, "")
 
         # Upload the file
         _s3_client = boto3.client("s3")
