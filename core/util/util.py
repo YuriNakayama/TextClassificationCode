@@ -3,15 +3,22 @@
 # +
 import logging
 import os
+import re
 import shutil
+import sys
 from typing import List
 
 import boto3
 import requests
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
-
 # -
+
+# ## Add configuration file
+
+sys.path.append("/home/jovyan/core/config/")
+
+from ALL import config, data_type_re
 
 # # Load envs
 
@@ -22,6 +29,14 @@ root_path = "/home/jovyan"
 root_path_temporary = "/home/jovyan/temporary/"
 
 # # Function
+
+
+# ## local utility
+
+def data_type_classifier(data_type, data_type_re=data_type_re):
+    for _data_type, _re in data_type_re.items():
+        if re.match(_re, data_type):
+            return _data_type
 
 
 # ## file function
