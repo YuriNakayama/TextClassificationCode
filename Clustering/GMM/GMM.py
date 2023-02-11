@@ -35,7 +35,7 @@ transformer_model = sys.argv[3]
 
 max_vector_model_num = config["vectorize"][vectorize_type]["max_model_num"]
 vector_dims = config["vectorize"][vectorize_type]["dims"]
-normalization = config["vectorize"][vectorize_type]["normalization"]
+normalizations = config["vectorize"][vectorize_type]["normalization"]
 model_nums = config["clustering"]["gmm"]["max_model_num"]
 covariance_types = config["clustering"]["gmm"]["covariance_types"]
 
@@ -88,28 +88,28 @@ def getGMM(vectors, n_components, covariance_type, seed, path):
 
 for vector_model_num in range(max_vector_model_num):
     for vector_dim in tqdm(vector_dims):
-        for model_num in range(model_nums):
-            for covariance_type in covariance_types:
-                for n_component in n_components:
-                    vectors = np.load(
-                        f"{vectors_path}{vector_dim}/{normalization}/{vector_model_num}.npy"
-                    )
+        for normalization in normalizations:
+            vectors = np.load(
+                f"{vectors_path}{vector_dim}/{normalization}/{vector_model_num}.npy"
+            )
+            for model_num in range(model_nums):
+                for covariance_type in covariance_types:
+                    for n_component in n_components:
+                        pred = getGMM(
+                            vectors,
+                            seed=model_num,
+                            n_components=n_components,
+                            covariance_type=covariance_type,
+                            path=f"{models_path}{vector_dim}/{normalization}/{n_component}/{covariance_type}/{model_num}.sav",
+                        )
 
-                    pred = getGMM(
-                        vectors,
-                        seed=model_num,
-                        n_components=n_components,
-                        covariance_type=covariance_type,
-                        path=f"{models_path}{vector_dim}/{normalization}/{n_component}/{covariance_type}/{model_num}.sav",
-                    )
-
-                    # save prediction
-                    np.save(
-                        make_filepath(
-                            f"{pred_path}{vector_dim}/{normalization}/{n_component}/{covariance_type}/{model_num}.npy"
-                        ),
-                        pred,
-                    )
+                        # save prediction
+                        np.save(
+                            make_filepath(
+                                f"{pred_path}{vector_dim}/{normalization}/{n_component}/{covariance_type}/{model_num}.npy"
+                            ),
+                            pred,
+                        )
 
 # # Upload files
 

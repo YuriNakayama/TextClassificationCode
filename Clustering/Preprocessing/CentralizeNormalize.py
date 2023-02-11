@@ -31,8 +31,10 @@ data_type=sys.argv[1]
 vectorize_type = sys.argv[2]
 transformer_model = sys.argv[3]
 
-max_vector_model_nums = config["vectorize"][vectorize_type]["max_model_num"]
-vector_dims = config["vectorize"][vectorize_type]["dims"]
+max_vector_model_nums = config["vectorize"][vectorize_type][transformer_model]["max_model_num"]
+vector_dims = config["vectorize"][vectorize_type][transformer_model]["dims"]
+
+depression_type = "umap"
 
 # # Read data
 
@@ -78,11 +80,13 @@ def get_average_vector(vectors):
 # # Centralize Normalize
 
 if vectorize_type == "doc2vec":
-    vectors_path = f"../../temporary/Vectorize/{data_type}/{vectorize_type}/vector"
-    converted_vectors_path = f"../../temporary/Clustering/{data_type}/{vectorize_type}/vector"
+    vectors_path = f"{root_path_temporary}Vectorize/{data_type}/{vectorize_type}/vector"
+    converted_vectors_path = (
+        f"{root_path_temporary}Clustering/{data_type}/{vectorize_type}/vector"
+    )
 elif vectorize_type == "sentenceBERT":
-    vectors_path = f"../../temporary/Vectorize/{data_type}/{transformer_model}/{vectorize_type}/vector"
-    converted_vectors_path = f"../../temporary/Clustering/{data_type}/{vectorize_type}/{transformer_model}/vector"
+    vectors_path = f"{root_path_temporary}Vectorize/{data_type}/{transformer_model}/{vectorize_type}/vector/{depression_type}"
+    converted_vectors_path = f"{root_path_temporary}Clustering/{data_type}/{vectorize_type}/{transformer_model}/vector/{depression_type}"
 else:
     raise NotImplementedError
 
