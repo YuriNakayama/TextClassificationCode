@@ -59,17 +59,15 @@ with open(labels_path[0], mode="r") as f:
     class_labels = [label for label in reader]
 
 if vectorize_type == "doc2vec":
-    vectors_path = f"Clustering/{data_type}/{vectorize_type}/vector/{depression_type}/"
-    models_path = f"/home/jovyan/temporary/Clustering/{data_type}/{vectorize_type}/GMM/model/"
-    pred_path = f"/home/jovyan/temporary/Clustering/{data_type}/{vectorize_type}/GMM/pred/"
+    vectors_object = f"Clustering/{data_type}/{vectorize_type}/vector/{depression_type}/"
+    models_object = f"Clustering/{data_type}/{vectorize_type}/GMM/model/"
+    pred_object = f"Clustering/{data_type}/{vectorize_type}/GMM/pred/"
 elif vectorize_type == "sentenceBERT":
-    vectors_path = f"Clustering/{data_type}/{vectorize_type}/{transformer_model}/vector/{depression_type}/"
-    models_path = f"/home/jovyan/temporary/Clustering/{data_type}/{vectorize_type}/{transformer_model}/GMM/model/"
-    pred_path = f"/home/jovyan/temporary/Clustering/{data_type}/{vectorize_type}/{transformer_model}/GMM/pred/"
+    vectors_object = f"Clustering/{data_type}/{vectorize_type}/{transformer_model}/vector/{depression_type}/"
+    models_object = f"Clustering/{data_type}/{vectorize_type}/{transformer_model}/GMM/model/"
+    pred_object = f"Clustering/{data_type}/{vectorize_type}/{transformer_model}/GMM/pred/"
 else:
     raise NotImplementedError
-
-s3.download(vectors_path)
 
 
 # # Clustering
@@ -99,25 +97,34 @@ def runGetGMM(model_num):
     for vector_model_num, vector_dim, normalization in product(
         range(max_vector_model_num), vector_dims, normalizations
     ):
-        vectors = np.load(
-            f"{root_path_temporary}{vectors_path}{vector_dim}/{normalization}/{vector_model_num}.npy"
+        _vector_object = (
+            f"{vectors_object}{vector_dim}/{normalization}/{vector_model_num}.npy"
         )
+        _vectors_file_path = s3.download(_vector_object)
+        vectors = np.load(_vectors_file_path[0])
         for covariance_type, n_component in product(covariance_types, n_components):
+            iter_path = f"{vector_dim}/{normalization}/{n_component}/{covariance_type}/{model_num}"
+
+            _model_file_path = f"{root_path_temporary}{models_object}{iter_path}.sav"
             pred = getGMM(
                 vectors,
                 seed=model_num,
                 n_components=n_component,
                 covariance_type=covariance_type,
-                path=f"{models_path}{vector_dim}/{normalization}/{n_component}/{covariance_type}/{model_num}.sav",
+                path=_model_file_path,
             )
+            s3.upload(_model_file_path)
+            s3.delete_local(_model_file_path)
 
             # save prediction
+            _pred_file_path = f"{root_path_temporary}{pred_object}{iter_path}.npy"
             np.save(
-                make_filepath(
-                    f"{pred_path}{vector_dim}/{normalization}/{n_component}/{covariance_type}/{model_num}.npy"
-                ),
+                make_filepath(_pred_file_path),
                 pred,
             )
+            s3.upload(_pred_file_path)
+            s3.delete_local(_pred_file_path)
+        s3.delete_local(_vector_object)
 
 
 # +
@@ -129,13 +136,7 @@ process_map(runGetGMM, model_nums, max_workers=os.cpu_count(), chunksize=1)
 
 # # Upload files
 
-s3.upload(
-     models_path,
-)
-
-s3.upload(
-     pred_path,
-)
+s3.delete_local_all()
 
 send_line_notify(f"end MultiGMM{data_type} {vectorize_type} {transformer_model}")
 
