@@ -10,7 +10,7 @@ config = {
                 32,
             ]
         },
-        "20News": {"class_num": [5, 10, 20, 40]},
+        "20News": {"class_num": [5, 10, 20, 30]},
     },
     "vectorize": {
         "doc2vec": {

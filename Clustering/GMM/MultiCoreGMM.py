@@ -59,19 +59,17 @@ with open(labels_path[0], mode="r") as f:
     class_labels = [label for label in reader]
 
 if vectorize_type == "doc2vec":
-    vector_object = f"Clustering/{data_type}/{vectorize_type}/vector/{depression_type}/"
-    vectors_path = f"/home/jovyan/temporary/Clustering{data_type}/{vectorize_type}/vector/{depression_type}/"
+    vectors_path = f"Clustering/{data_type}/{vectorize_type}/vector/{depression_type}/"
     models_path = f"/home/jovyan/temporary/Clustering/{data_type}/{vectorize_type}/GMM/model/"
     pred_path = f"/home/jovyan/temporary/Clustering/{data_type}/{vectorize_type}/GMM/pred/"
 elif vectorize_type == "sentenceBERT":
-    vector_object = f"Clustering/{data_type}/{vectorize_type}/{transformer_model}/vector/{depression_type}/"
-    vectors_path = f"/home/jovyan/temporary/Clustering/{data_type}/{vectorize_type}/{transformer_model}/vector/{depression_type}/"
+    vectors_path = f"Clustering/{data_type}/{vectorize_type}/{transformer_model}/vector/{depression_type}/"
     models_path = f"/home/jovyan/temporary/Clustering/{data_type}/{vectorize_type}/{transformer_model}/GMM/model/"
     pred_path = f"/home/jovyan/temporary/Clustering/{data_type}/{vectorize_type}/{transformer_model}/GMM/pred/"
 else:
     raise NotImplementedError
 
-s3.download(vector_object)
+s3.download(vectors_path)
 
 
 # # Clustering
@@ -81,8 +79,9 @@ def getGMM(vectors, n_components, covariance_type, seed, path):
         n_components=n_components,
         covariance_type=covariance_type,
         random_state=seed,
-        max_iter=400,
+        max_iter=600,
         init_params="k-means++",
+        reg_covar=1e-5,
         n_init=1,
     )
     gmm.fit(vectors)
@@ -101,7 +100,7 @@ def runGetGMM(model_num):
         range(max_vector_model_num), vector_dims, normalizations
     ):
         vectors = np.load(
-            f"{vectors_path}{vector_dim}/{normalization}/{vector_model_num}.npy"
+            f"{root_path_temporary}{vectors_path}{vector_dim}/{normalization}/{vector_model_num}.npy"
         )
         for covariance_type, n_component in product(covariance_types, n_components):
             pred = getGMM(
@@ -126,7 +125,7 @@ def runGetGMM(model_num):
 #     executor.map(runGetGMM, model_nums)
 # -
 
-r = process_map(runGetGMM, model_nums, max_workers=os.cpu_count(), chunksize=100)
+process_map(runGetGMM, model_nums, max_workers=os.cpu_count(), chunksize=100)
 
 # # Upload files
 
@@ -148,28 +147,29 @@ send_line_notify(f"end MultiGMM{data_type} {vectorize_type} {transformer_model}"
 
 
 
-for vector_model_num in range(max_vector_model_num):
-    for vector_dim in tqdm(vector_dims):
-        for normalization in normalizations:
-            vectors = np.load(
-                f"{vectors_path}{vector_dim}/{normalization}/{vector_model_num}.npy"
-            )
+# +
+# for vector_model_num in range(max_vector_model_num):
+#     for vector_dim in tqdm(vector_dims):
+#         for normalization in normalizations:
+#             vectors = np.load(
+#                 f"{vectors_path}{vector_dim}/{normalization}/{vector_model_num}.npy"
+#             )
             
-            for model_num in range(model_nums):
-                for covariance_type in covariance_types:
-                    for n_component in n_components:
-                        pred = getGMM(
-                            vectors,
-                            seed=model_num,
-                            n_components=n_components,
-                            covariance_type=covariance_type,
-                            path=f"{models_path}{vector_dim}/{normalization}/{n_component}/{covariance_type}/{model_num}.sav",
-                        )
+#             for model_num in range(model_nums):
+#                 for covariance_type in covariance_types:
+#                     for n_component in n_components:
+#                         pred = getGMM(
+#                             vectors,
+#                             seed=model_num,
+#                             n_components=n_components,
+#                             covariance_type=covariance_type,
+#                             path=f"{models_path}{vector_dim}/{normalization}/{n_component}/{covariance_type}/{model_num}.sav",
+#                         )
 
-                        # save prediction
-                        np.save(
-                            make_filepath(
-                                f"{pred_path}{vector_dim}/{normalization}/{n_component}/{covariance_type}/{model_num}.npy"
-                            ),
-                            pred,
-                        )
+#                         # save prediction
+#                         np.save(
+#                             make_filepath(
+#                                 f"{pred_path}{vector_dim}/{normalization}/{n_component}/{covariance_type}/{model_num}.npy"
+#                             ),
+#                             pred,
+#                         )
