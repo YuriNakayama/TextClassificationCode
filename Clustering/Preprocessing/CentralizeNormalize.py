@@ -85,7 +85,7 @@ if vectorize_type == "doc2vec":
         f"{root_path_temporary}Clustering/{data_type}/{vectorize_type}/vector"
     )
 elif vectorize_type == "sentenceBERT":
-    vectors_path = f"{root_path_temporary}Vectorize/{data_type}/{transformer_model}/{vectorize_type}/vector/{depression_type}"
+    vectors_path = f"{root_path_temporary}Vectorize/{data_type}/{vectorize_type}/{transformer_model}/vector/{depression_type}"
     converted_vectors_path = f"{root_path_temporary}Clustering/{data_type}/{vectorize_type}/{transformer_model}/vector/{depression_type}"
 else:
     raise NotImplementedError
