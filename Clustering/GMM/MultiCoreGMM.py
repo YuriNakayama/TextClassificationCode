@@ -32,9 +32,9 @@ pd.set_option("display.max_rows", 50)
 
 s3 = S3Manager()
 
-data_type="20NewsSampled1"#sys.argv[1]
-vectorize_type ="sentenceBERT" #sys.argv[2]
-transformer_model = "sentence-transformers/all-MiniLM-L6-v2"#sys.argv[3]
+data_type=sys.argv[1]
+vectorize_type =sys.argv[2]
+transformer_model = sys.argv[3]
 
 max_vector_model_num = config["vectorize"][vectorize_type][transformer_model]["max_model_num"]
 vector_dims = config["vectorize"][vectorize_type][transformer_model]["dims"]
