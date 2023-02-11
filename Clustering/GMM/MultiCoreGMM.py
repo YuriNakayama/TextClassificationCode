@@ -125,7 +125,7 @@ def runGetGMM(model_num):
 #     executor.map(runGetGMM, model_nums)
 # -
 
-process_map(runGetGMM, model_nums, max_workers=os.cpu_count(), chunksize=100)
+process_map(runGetGMM, model_nums, max_workers=os.cpu_count(), chunksize=1)
 
 # # Upload files
 
