@@ -3,6 +3,7 @@
 # +
 import logging
 import os
+import re
 import shutil
 import sys
 from typing import List
@@ -13,14 +14,29 @@ from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 # -
 
+# ## Add configuration file
+
+sys.path.append("/home/jovyan/core/config/")
+
+from ALL import config, data_type_re
+
 # # Load envs
 
 load_dotenv()
 
-s3_bucket_name =  "text-classification-nakayama-bucket"
+s3_bucket_name = "text-classification-nakayama-bucket"
 root_path = "/home/jovyan"
+root_path_temporary = "/home/jovyan/temporary/"
 
 # # Function
+
+
+# ## local utility
+
+def data_type_classifier(data_type, data_type_re=data_type_re):
+    for _data_type, _re in data_type_re.items():
+        if re.match(_re, data_type):
+            return _data_type
 
 
 # ## file function
@@ -98,9 +114,9 @@ class S3Manager:
                     for _object, _file_path in zip(_objects, _file_paths):
                         _s3_client.upload_file(_file_path, bucket, _object)
 
-        # If S3 object_name was not specified, use file_path
+        # If S3 object_name was not specified, use subdirectry of "temporary" folder
         if object_name is None:
-            object_name = os.path.basename(file_path)
+            object_name = os.path.abspath(file_path).replace(root_path_temporary, "")
 
         # Upload the file
         _s3_client = boto3.client("s3")

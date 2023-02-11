@@ -29,7 +29,7 @@ pd.set_option("display.max_rows", 50)
 
 s3 = S3Manager()
 
-data_type = "20NewsSampled128"
+data_type=sys.argv[1]
 
 # # Read data
 
@@ -44,9 +44,6 @@ with open(labels_path[0], mode="r") as f:
     class_labels = [label for label in reader]
 
 # # Word tokenize
-
-download('punkt')
-download("stopwords")
 
 df["words"] = df.text.progress_apply(word_tokenize)
 
@@ -80,17 +77,15 @@ df.words_nonstop = df.words_nonstop.progress_apply(
 
 # ## make file
 
-with open(make_filepath(f"../../temporary/Preprocessing/{data_type}/class.csv"), "w") as f:
+with open(make_filepath(f"../temporary/Preprocessing/{data_type}/class.csv"), "w") as f:
     writer = csv.writer(f)
     writer.writerow(class_labels)
-df.to_csv(make_filepath(f"../../temporary/DataShaping/{data_type}/master.csv"))
+df.to_csv(make_filepath(f"../temporary/Preprocessing/{data_type}/master.csv"))
 
 # ## upload file
 
-s3.upload(f"../../temporary/Preprocessing/{data_type}", f"DataShaping/{data_type}/")
+s3.upload(f"../temporary/Preprocessing/{data_type}", f"Preprocessing/{data_type}/")
 
 s3.delete_local_all()
-
-shutil.rmtree("../../nltk_data/")
 
 

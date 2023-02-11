@@ -1,29 +1,46 @@
 config = {
     "data": {
-        "AgNews": {
-            "class_num": 4,
-        },
+        "AgNews": {"class_num": [2, 4, 8, 16, 32, 64]},
         "AgNewsTitle": {
-            "class_num": 4,
+            "class_num": [
+                2,
+                4,
+                8,
+                16,
+                32,
+                64,
+            ]
         },
-        "20News": {"class_num": 20},
+        "20News": {"class_num": [5, 10, 20, 40, 80]},
     },
     "vectorize": {
         "doc2vec": {
             "max_model_num": 1,
-            "normalization": "normalized",
-            "dims": [2, 4,  8, 16, 32, 64, 128, 256],
+            "normalization": ["normalized", "centralized"],
+            "dims": [2, 4, 8, 16, 32, 64, 128, 256],
         },
         "sentenceBERT": {
-            "max_model_num": 1,
-            "normalization": "normalized",
-            "dims": [2, 4,  8, 16, 32, 64, 128, 256],
+            "sentence-transformers/all-MiniLM-L6-v2": {
+                "max_model_num": 1,
+                "normalization": ["normalized", "centralized"],
+                "dims": [2, 4, 8, 16, 32, 64, 128, 256, 384],
+            },
+            "sentence-transformers/all-mpnet-base-v2": {
+                "max_model_num": 1,
+                "normalization": ["normalized", "centralized"],
+                "dims": [2, 4, 8, 16, 32, 64, 128, 256, 768],
+            },
+            "sentence-transformers/all-distilroberta-v1": {
+                "max_model_num": 1,
+                "normalization": ["normalized", "centralized"],
+                "dims": [2, 4, 8, 16, 32, 64, 128, 256, 768],
+            },
         },
     },
     "clustering": {
         "gmm": {
             "max_model_num": 30,
-            "covariance_types": ["spherical", "diag", "tied", "full"],
+            "covariance_types": ["spherical", "diag", "full"],
         },
         "kmeans": {
             "max_model_num": 30,
@@ -32,6 +49,18 @@ config = {
             "max_model_num": 30,
         },
     },
+}
+
+# +
+{
+    
+}
+# -
+
+data_type_re = {
+    "20News": r"^20News",
+    "AgNewsTitle": r"^AgNewsTitle",
+    "AgNews": r"^AgNews",
 }
 
 # +

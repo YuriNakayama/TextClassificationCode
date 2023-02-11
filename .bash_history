@@ -12,3 +12,41 @@ cd choldate; python setup.py install
 aws s3 ls
 s3 ls
 aws version
+ls
+cd Preprocessing/
+ls
+bash RunRemoveStopword.sh 
+bash RunRemoveStopword.sh 
+bash RunRemoveStopword.sh 
+bash RunRemoveStopword.sh 
+bash RunRemoveStopword.sh 
+bash RunRemoveStopword.sh 
+bash RunRemoveStopword.sh 
+bash RunRemoveStopword.sh 
+bash RunRemoveStopword.sh 
+bash RunRemoveStopword.sh 
+bash RunRemoveStopword.sh 
+bash RunRemoveStopword.sh 
+cd
+cd V
+cd Vectorize/
+ls
+cd SentenceBERT/
+ls
+free
+free
+bash RunSentenceBERT.sh 
+bash RunSentenceBERT.sh 
+bash RunSentenceBERT.sh 
+bash RunSentenceBERT.sh 
+ls
+cd ShellScript/
+ls
+bash RunSentenceBERT.sh 
+bash RunSentenceBERT.sh 
+bash RunDimensionDepression.sh 
+bash RunDimensionDepression.sh 
+bash RunDimensionDepression.sh 
+bash RunDimensionDepression.sh 
+bash RunDimensionDepression.sh 
+bash RunDimensionDepression.sh 
