@@ -36,10 +36,10 @@ past
 scikit_learn_data
 temporary
 tmp
+__pycache__
 
 
 
 work/mecab-ipadic-neologd
 
-!requirements.txt
 !requirements.txt

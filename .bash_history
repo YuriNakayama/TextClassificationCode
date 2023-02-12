@@ -50,3 +50,30 @@ bash RunDimensionDepression.sh
 bash RunDimensionDepression.sh 
 bash RunDimensionDepression.sh 
 bash RunDimensionDepression.sh 
+git add .
+git commit -m "to merge"
+git push TextClassification
+git remote
+git push TextClassificationCode
+git config –global http.postBuffer 2M
+git config -–global http.postBuffer 2M
+git config --global http.postBuffer 524288000
+git push 
+git status
+git add .
+git status
+git push TextClassificationCode
+cd .ssh
+ls
+cd known_hosts
+vim known_hosts
+ls
+cd Clustering/
+cd Preprocessing/
+ls
+bash RunCentralizeNormalize.sh 
+bash RunCentralizeNormalize.sh 
+bash RunCentralizeNormalize.sh 
+bash RunCentralizeNormalize.sh 
+bash RunCentralizeNormalize.sh 
+bash RunCentralizeNormalize.sh 
