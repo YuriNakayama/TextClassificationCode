@@ -50,3 +50,34 @@ bash RunDimensionDepression.sh
 bash RunDimensionDepression.sh 
 bash RunDimensionDepression.sh 
 bash RunDimensionDepression.sh 
+ls
+python
+ls
+cd Clustering/
+ls
+cd GMM
+ls
+cd ShellScript/
+ls
+bash RunMultiCoreGMM 
+bash RunMultiCoreGMM 
+bash RunMultiCoreGMM 
+bash RunMultiCoreGMM 
+bash RunMultiCoreGMM 
+free
+free -h
+htop
+df -h
+df -h
+df -h
+df -h
+ctop
+htop
+htop
+df -h
+htop
+bash RunMultiCoreGMM 
+bash RunMultiCoreGMM 
+bash RunMultiCoreGMM 
+htop
+jobs

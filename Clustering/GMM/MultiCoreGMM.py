@@ -138,7 +138,7 @@ process_map(runGetGMM, model_nums, max_workers=os.cpu_count(), chunksize=1)
 
 s3.delete_local_all()
 
-send_line_notify(f"end MultiGMM{data_type} {vectorize_type} {transformer_model}")
+send_line_notify(f"end MultiCoreGMM.py {data_type} {vectorize_type} {transformer_model}")
 
 
 
