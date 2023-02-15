@@ -7,7 +7,7 @@ sampling_nums=(
 )
 
 transformer_models=(
-    sentence-transformers/all-MiniLM-L6-v2
+    #sentence-transformers/all-MiniLM-L6-v2
     sentence-transformers/all-mpnet-base-v2
     sentence-transformers/all-distilroberta-v1
 )

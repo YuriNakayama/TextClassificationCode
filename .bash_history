@@ -77,3 +77,43 @@ bash RunCentralizeNormalize.sh
 bash RunCentralizeNormalize.sh 
 bash RunCentralizeNormalize.sh 
 bash RunCentralizeNormalize.sh 
+free -h
+df -h
+git add .
+git commit -m "2/12"
+git branch -a
+git push TextClassificationCode
+git add .
+git commit -m ".gitignore"
+git pull TextClassificationCode
+git pull TextClassificationCode/main
+git pull TextClassificationCode main
+git pull TextClassificationCode main
+git pull TextClassificationCode main
+git add .
+git commit -m "差分解消"
+git push TextClassificationCode
+htop
+sudo apt install htop
+htop
+df -h
+free -h
+htop
+echo 1 > /proc/sys/vm/drop_caches
+free
+free -h
+python DimensionDepression.py TweetFinance sentence-transformers/all-mpnet-base-v2
+cd Vectorize/
+ls
+cd SentenceBERT/
+cd ShellScript/
+free
+bash RunSentenceBERT.sh 
+bash RunSentenceBERT.sh 
+ls
+bash RunDimensionDepression.sh 
+bash RunSBERTTwitter.sh 
+bash RunSBERTTwitter.sh 
+cd ..
+ls
+python DimensionDepression.py TweetFinance sentence-transformers/all-MiniLM-L6-v2
