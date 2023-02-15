@@ -86,6 +86,6 @@ s3.upload(
 
 s3.delete_local_all()
 
-send_line_notify(f"end SBERT {data_type} {transformer_model}")
+send_line_notify(f"end SentenceBERT.py {data_type} {transformer_model}")
 
 
