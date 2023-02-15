@@ -32,9 +32,9 @@ pd.set_option("display.max_rows", 50)
 
 s3 = S3Manager()
 
-data_type="20NewsSampled1"#sys.argv[1]
-vectorize_type ="sentenceBERT" #sys.argv[2]
-transformer_model = "sentence-transformers/all-MiniLM-L6-v2"#sys.argv[3]
+data_type=sys.argv[1]
+vectorize_type =sys.argv[2]
+transformer_model = sys.argv[3]
 
 max_vector_model_num = config["vectorize"][vectorize_type][transformer_model]["max_model_num"]
 vector_dims = config["vectorize"][vectorize_type][transformer_model]["dims"]
@@ -59,19 +59,15 @@ with open(labels_path[0], mode="r") as f:
     class_labels = [label for label in reader]
 
 if vectorize_type == "doc2vec":
-    vector_object = f"Clustering/{data_type}/{vectorize_type}/vector/{depression_type}/"
-    vectors_path = f"/home/jovyan/temporary/Clustering{data_type}/{vectorize_type}/vector/{depression_type}/"
-    models_path = f"/home/jovyan/temporary/Clustering/{data_type}/{vectorize_type}/GMM/model/"
-    pred_path = f"/home/jovyan/temporary/Clustering/{data_type}/{vectorize_type}/GMM/pred/"
+    vectors_object = f"Clustering/{data_type}/{vectorize_type}/vector/{depression_type}/"
+    models_object = f"Clustering/{data_type}/{vectorize_type}/GMM/model/"
+    pred_object = f"Clustering/{data_type}/{vectorize_type}/GMM/pred/"
 elif vectorize_type == "sentenceBERT":
-    vector_object = f"Clustering/{data_type}/{vectorize_type}/{transformer_model}/vector/{depression_type}/"
-    vectors_path = f"/home/jovyan/temporary/Clustering/{data_type}/{vectorize_type}/{transformer_model}/vector/{depression_type}/"
-    models_path = f"/home/jovyan/temporary/Clustering/{data_type}/{vectorize_type}/{transformer_model}/GMM/model/"
-    pred_path = f"/home/jovyan/temporary/Clustering/{data_type}/{vectorize_type}/{transformer_model}/GMM/pred/"
+    vectors_object = f"Clustering/{data_type}/{vectorize_type}/{transformer_model}/vector/{depression_type}/"
+    models_object = f"Clustering/{data_type}/{vectorize_type}/{transformer_model}/GMM/model/"
+    pred_object = f"Clustering/{data_type}/{vectorize_type}/{transformer_model}/GMM/pred/"
 else:
     raise NotImplementedError
-
-s3.download(vector_object)
 
 
 # # Clustering
@@ -81,8 +77,9 @@ def getGMM(vectors, n_components, covariance_type, seed, path):
         n_components=n_components,
         covariance_type=covariance_type,
         random_state=seed,
-        max_iter=400,
+        max_iter=600,
         init_params="k-means++",
+        reg_covar=1e-5,
         n_init=1,
     )
     gmm.fit(vectors)
@@ -100,25 +97,34 @@ def runGetGMM(model_num):
     for vector_model_num, vector_dim, normalization in product(
         range(max_vector_model_num), vector_dims, normalizations
     ):
-        vectors = np.load(
-            f"{vectors_path}{vector_dim}/{normalization}/{vector_model_num}.npy"
+        _vector_object = (
+            f"{vectors_object}{vector_dim}/{normalization}/{vector_model_num}.npy"
         )
+        _vectors_file_path = s3.download(_vector_object)
+        vectors = np.load(_vectors_file_path[0])
         for covariance_type, n_component in product(covariance_types, n_components):
+            iter_path = f"{vector_dim}/{normalization}/{n_component}/{covariance_type}/{model_num}"
+
+            _model_file_path = f"{root_path_temporary}{models_object}{iter_path}.sav"
             pred = getGMM(
                 vectors,
                 seed=model_num,
                 n_components=n_component,
                 covariance_type=covariance_type,
-                path=f"{models_path}{vector_dim}/{normalization}/{n_component}/{covariance_type}/{model_num}.sav",
+                path=_model_file_path,
             )
+            s3.upload(_model_file_path)
+            s3.delete_local(_model_file_path)
 
             # save prediction
+            _pred_file_path = f"{root_path_temporary}{pred_object}{iter_path}.npy"
             np.save(
-                make_filepath(
-                    f"{pred_path}{vector_dim}/{normalization}/{n_component}/{covariance_type}/{model_num}.npy"
-                ),
+                make_filepath(_pred_file_path),
                 pred,
             )
+            s3.upload(_pred_file_path)
+            s3.delete_local(_pred_file_path)
+        s3.delete_local(_vector_object)
 
 
 # +
@@ -126,19 +132,13 @@ def runGetGMM(model_num):
 #     executor.map(runGetGMM, model_nums)
 # -
 
-r = process_map(runGetGMM, model_nums, max_workers=os.cpu_count(), chunksize=100)
+process_map(runGetGMM, model_nums, max_workers=os.cpu_count(), chunksize=1)
 
 # # Upload files
 
-s3.upload(
-     models_path,
-)
+s3.delete_local_all()
 
-s3.upload(
-     pred_path,
-)
-
-send_line_notify(f"end MultiGMM{data_type} {vectorize_type} {transformer_model}")
+send_line_notify(f"end MultiCoreGMM.py {data_type} {vectorize_type} {transformer_model}")
 
 
 
@@ -148,28 +148,29 @@ send_line_notify(f"end MultiGMM{data_type} {vectorize_type} {transformer_model}"
 
 
 
-for vector_model_num in range(max_vector_model_num):
-    for vector_dim in tqdm(vector_dims):
-        for normalization in normalizations:
-            vectors = np.load(
-                f"{vectors_path}{vector_dim}/{normalization}/{vector_model_num}.npy"
-            )
+# +
+# for vector_model_num in range(max_vector_model_num):
+#     for vector_dim in tqdm(vector_dims):
+#         for normalization in normalizations:
+#             vectors = np.load(
+#                 f"{vectors_path}{vector_dim}/{normalization}/{vector_model_num}.npy"
+#             )
             
-            for model_num in range(model_nums):
-                for covariance_type in covariance_types:
-                    for n_component in n_components:
-                        pred = getGMM(
-                            vectors,
-                            seed=model_num,
-                            n_components=n_components,
-                            covariance_type=covariance_type,
-                            path=f"{models_path}{vector_dim}/{normalization}/{n_component}/{covariance_type}/{model_num}.sav",
-                        )
+#             for model_num in range(model_nums):
+#                 for covariance_type in covariance_types:
+#                     for n_component in n_components:
+#                         pred = getGMM(
+#                             vectors,
+#                             seed=model_num,
+#                             n_components=n_components,
+#                             covariance_type=covariance_type,
+#                             path=f"{models_path}{vector_dim}/{normalization}/{n_component}/{covariance_type}/{model_num}.sav",
+#                         )
 
-                        # save prediction
-                        np.save(
-                            make_filepath(
-                                f"{pred_path}{vector_dim}/{normalization}/{n_component}/{covariance_type}/{model_num}.npy"
-                            ),
-                            pred,
-                        )
+#                         # save prediction
+#                         np.save(
+#                             make_filepath(
+#                                 f"{pred_path}{vector_dim}/{normalization}/{n_component}/{covariance_type}/{model_num}.npy"
+#                             ),
+#                             pred,
+#                         )

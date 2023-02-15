@@ -7,6 +7,7 @@ import re
 import shutil
 import sys
 from typing import List
+from itertools import chain
 
 import boto3
 import requests
@@ -226,6 +227,28 @@ class S3Manager:
                 )
         return keys
 
+    def delete_local(self, path):
+        def _delete_file_or_folder(_path):
+            if os.path.exists(_path):
+                if os.path.isfile(_path):
+                    os.remove(_path)
+                else:
+                    shutil.rmtree(_path)
+                return True
+            else:
+                return False
+
+        if path not in chain.from_iterable(
+            [_file_dict.keys() for _file_dict in self.files.values()]
+        ):
+            return False
+
+        if _delete_file_or_folder(path):
+            for _file_dict in self.files.values():
+                _file_dict.pop(path)
+                return True
+        return False
+
     def delete_local_all(self):
         def _delete_file_or_folder(_path):
             if os.path.exists(_path):
@@ -243,3 +266,8 @@ class S3Manager:
                     if not _save:
                         _delete_file_or_folder(_file)
                         print(_file)
+
+
+files = {0: {1: 2}, 3: {4: 5}}
+
+

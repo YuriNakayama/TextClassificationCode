@@ -1,6 +1,6 @@
 config = {
     "data": {
-        "AgNews": {"class_num": [2, 4, 8, 16, 32, 64]},
+        "AgNews": {"class_num": [2, 4, 8, 16, 32]},
         "AgNewsTitle": {
             "class_num": [
                 2,
@@ -8,60 +8,109 @@ config = {
                 8,
                 16,
                 32,
-                64,
             ]
         },
-        "20News": {"class_num": [5, 10, 20, 40, 80]},
+        "20News": {"class_num": [20]},
     },
     "vectorize": {
         "doc2vec": {
             "max_model_num": 1,
             "normalization": ["normalized", "centralized"],
-            "dims": [2, 4, 8, 16, 32, 64, 128, 256],
+            "dims": [2, 4, 8, 16, 32, 64, 128],
         },
         "sentenceBERT": {
             "sentence-transformers/all-MiniLM-L6-v2": {
                 "max_model_num": 1,
                 "normalization": ["normalized", "centralized"],
-                "dims": [2, 4, 8, 16, 32, 64, 128, 256, 384],
+                "dims": [2, 4, 8, 16, 32, 64, 128],
             },
             "sentence-transformers/all-mpnet-base-v2": {
                 "max_model_num": 1,
                 "normalization": ["normalized", "centralized"],
-                "dims": [2, 4, 8, 16, 32, 64, 128, 256, 768],
+                "dims": [2, 4, 8, 16, 32, 64, 128],
             },
             "sentence-transformers/all-distilroberta-v1": {
                 "max_model_num": 1,
                 "normalization": ["normalized", "centralized"],
-                "dims": [2, 4, 8, 16, 32, 64, 128, 256, 768],
+                "dims": [2, 4, 8, 16, 32, 64, 128],
             },
         },
     },
     "clustering": {
         "gmm": {
-            "max_model_num": 30,
+            "max_model_num": 20,
             "covariance_types": ["spherical", "diag", "full"],
         },
         "kmeans": {
-            "max_model_num": 30,
+            "max_model_num": 20,
         },
         "LDA": {
-            "max_model_num": 30,
+            "max_model_num": 20,
         },
     },
 }
-
-# +
-{
-    
-}
-# -
 
 data_type_re = {
     "20News": r"^20News",
     "AgNewsTitle": r"^AgNewsTitle",
     "AgNews": r"^AgNews",
 }
+
+
+
+
+
+# config = {
+#     "data": {
+#         "AgNews": {"class_num": [2, 4, 8, 16, 32]},
+#         "AgNewsTitle": {
+#             "class_num": [
+#                 2,
+#                 4,
+#                 8,
+#                 16,
+#                 32,
+#             ]
+#         },
+#         "20News": {"class_num": [5, 10, 20, 30]},
+#     },
+#     "vectorize": {
+#         "doc2vec": {
+#             "max_model_num": 1,
+#             "normalization": ["normalized", "centralized"],
+#             "dims": [2, 4, 8, 16, 32, 64, 128, 256],
+#         },
+#         "sentenceBERT": {
+#             "sentence-transformers/all-MiniLM-L6-v2": {
+#                 "max_model_num": 1,
+#                 "normalization": ["normalized", "centralized"],
+#                 "dims": [2, 4, 8, 16, 32, 64, 128, 256, 384],
+#             },
+#             "sentence-transformers/all-mpnet-base-v2": {
+#                 "max_model_num": 1,
+#                 "normalization": ["normalized", "centralized"],
+#                 "dims": [2, 4, 8, 16, 32, 64, 128, 256, 768],
+#             },
+#             "sentence-transformers/all-distilroberta-v1": {
+#                 "max_model_num": 1,
+#                 "normalization": ["normalized", "centralized"],
+#                 "dims": [2, 4, 8, 16, 32, 64, 128, 256, 768],
+#             },
+#         },
+#     },
+#     "clustering": {
+#         "gmm": {
+#             "max_model_num": 30,
+#             "covariance_types": ["spherical", "diag", "full"],
+#         },
+#         "kmeans": {
+#             "max_model_num": 30,
+#         },
+#         "LDA": {
+#             "max_model_num": 30,
+#         },
+#     },
+# }
 
 # +
 # config = {
@@ -99,6 +148,3 @@ data_type_re = {
 #         },
 #     },
 # }
-# -
-
-
