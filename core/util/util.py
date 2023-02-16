@@ -6,13 +6,14 @@ import os
 import re
 import shutil
 import sys
-from typing import List
 from itertools import chain
+from typing import List
 
 import boto3
 import requests
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
+
 # -
 
 # ## Add configuration file
@@ -34,6 +35,7 @@ root_path_temporary = "/home/jovyan/temporary/"
 
 # ## local utility
 
+
 def data_type_classifier(data_type, data_type_re=data_type_re):
     for _data_type, _re in data_type_re.items():
         if re.match(_re, data_type):
@@ -42,12 +44,14 @@ def data_type_classifier(data_type, data_type_re=data_type_re):
 
 # ## file function
 
+
 def make_filepath(path):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     return path
 
 
 # ## statistics function
+
 
 def get_describe(df, axis=0):
     """
@@ -77,6 +81,7 @@ def get_describe(df, axis=0):
 
 # ## notification
 
+
 def send_line_notify(notification_message):
     """
     LINEに通知する
@@ -84,18 +89,25 @@ def send_line_notify(notification_message):
     line_notify_token = os.getenv("LINE_NOTIFY_TOKEN")
     line_notify_api = "https://notify-api.line.me/api/notify"
     headers = {"Authorization": f"Bearer {line_notify_token}"}
-    data = {"message": f"{os.path.basename(os.getcwd())}: {notification_message}"}
+    data = {
+        "message": f"{os.path.basename(os.getcwd())}: {notification_message}"
+    }
     requests.post(line_notify_api, headers=headers, data=data)
 
 
 # ## S3
+
 
 class S3Manager:
     def __init__(self):
         self.files = {data_type: {} for data_type in ["upload", "download"]}
 
     def upload(
-        self, file_path, object_name=None, bucket=s3_bucket_name, save_file=False
+        self,
+        file_path,
+        object_name=None,
+        bucket=s3_bucket_name,
+        save_file=False,
     ):
         """Upload a file to an S3 bucket
 
@@ -110,20 +122,28 @@ class S3Manager:
             for _root, _, _files in os.walk(_dir_path, topdown=False):
                 if _files:
                     _root_path = _root.replace(_dir_path, _object_name)
-                    _file_paths = [os.path.join(_root, _file) for _file in _files]
-                    _objects = [os.path.join(_root_path, _file) for _file in _files]
+                    _file_paths = [
+                        os.path.join(_root, _file) for _file in _files
+                    ]
+                    _objects = [
+                        os.path.join(_root_path, _file) for _file in _files
+                    ]
                     for _object, _file_path in zip(_objects, _file_paths):
                         _s3_client.upload_file(_file_path, bucket, _object)
 
         # If S3 object_name was not specified, use subdirectry of "temporary" folder
         if object_name is None:
-            object_name = os.path.abspath(file_path).replace(root_path_temporary, "")
+            object_name = os.path.abspath(file_path).replace(
+                root_path_temporary, ""
+            )
 
         # Upload the file
         _s3_client = boto3.client("s3")
         try:
             if os.path.isfile(file_path):
-                _response = _s3_client.upload_file(file_path, bucket, object_name)
+                _response = _s3_client.upload_file(
+                    file_path, bucket, object_name
+                )
             else:
                 _upload_dir(file_path, object_name, bucket)
         except ClientError as e:
@@ -153,13 +173,17 @@ class S3Manager:
             _file_path_return = []
             if file_path is None:
                 for _object in _objects:
-                    _file_path = make_filepath(f"{root_path}/temporary/{_object}")
+                    _file_path = make_filepath(
+                        f"{root_path}/temporary/{_object}"
+                    )
                     _file_path_return.append(_file_path)
                     _s3.download_file(s3_bucket_name, _object, _file_path)
                     self.files["download"][_file_path] = save_file
             else:
                 for _object in _objects:
-                    _file_path = make_filepath(_object.replace(object_name, file_path))
+                    _file_path = make_filepath(
+                        _object.replace(object_name, file_path)
+                    )
                     _file_path_return.append(_file_path)
                     _s3.download_file(s3_bucket_name, _object, _file_path)
                     self.files["download"][_file_path] = save_file
@@ -169,7 +193,9 @@ class S3Manager:
             return False
         return _file_path_return
 
-    def ls(self, bucket: str, prefix: str, recursive: bool = False) -> List[str]:
+    def ls(
+        self, bucket: str, prefix: str, recursive: bool = False
+    ) -> List[str]:
         """S3上のファイルリスト取得
 
         Args:
@@ -202,7 +228,9 @@ class S3Manager:
         """
         s3 = boto3.client("s3")
         if recursive:
-            response = s3.list_objects(Bucket=bucket, Prefix=prefix, Marker=marker)
+            response = s3.list_objects(
+                Bucket=bucket, Prefix=prefix, Marker=marker
+            )
         else:
             response = s3.list_objects(
                 Bucket=bucket, Prefix=prefix, Marker=marker, Delimiter="/"
@@ -214,7 +242,9 @@ class S3Manager:
 
         if "CommonPrefixes" in response:
             # Delimiterが'/'のときはフォルダがKeyに含まれない
-            keys.extend([content["Prefix"] for content in response["CommonPrefixes"]])
+            keys.extend(
+                [content["Prefix"] for content in response["CommonPrefixes"]]
+            )
         if "Contents" in response:  # 該当する key がないと response に 'Contents' が含まれない
             keys.extend([content["Key"] for content in response["Contents"]])
             if "IsTruncated" in response:
@@ -269,5 +299,3 @@ class S3Manager:
 
 
 files = {0: {1: 2}, 3: {4: 5}}
-
-

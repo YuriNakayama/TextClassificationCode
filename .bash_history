@@ -81,3 +81,30 @@ bash RunMultiCoreGMM
 bash RunMultiCoreGMM 
 htop
 jobs
+git add .
+git commit -m "1/15"
+git push TextClassificationCode
+ls
+cd Clustering/
+ls
+cd Preprocessing/
+ls
+bash RunCentralizeNormalizeTweet.sh 
+cd ..
+ls
+cd GMM
+ls
+cd ShellScript/
+ls
+cd RunMultiCoreGMM.sh
+bash RunMultiCoreGMM.sh
+df
+df
+df
+bash RunMultiCoreGMM.sh
+bash RunMultiCoreGMM.sh
+bash RunMultiCoreGMM.sh
+bash RunMultiCoreGMM.sh
+bash RunMultiCoreGMM.sh
+bash RunMultiCoreGMM.sh
+bash RunMultiCoreGMM.sh

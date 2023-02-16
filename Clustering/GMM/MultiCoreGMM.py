@@ -148,29 +148,3 @@ send_line_notify(f"end MultiCoreGMM.py {data_type} {vectorize_type} {transformer
 
 
 
-# +
-# for vector_model_num in range(max_vector_model_num):
-#     for vector_dim in tqdm(vector_dims):
-#         for normalization in normalizations:
-#             vectors = np.load(
-#                 f"{vectors_path}{vector_dim}/{normalization}/{vector_model_num}.npy"
-#             )
-            
-#             for model_num in range(model_nums):
-#                 for covariance_type in covariance_types:
-#                     for n_component in n_components:
-#                         pred = getGMM(
-#                             vectors,
-#                             seed=model_num,
-#                             n_components=n_components,
-#                             covariance_type=covariance_type,
-#                             path=f"{models_path}{vector_dim}/{normalization}/{n_component}/{covariance_type}/{model_num}.sav",
-#                         )
-
-#                         # save prediction
-#                         np.save(
-#                             make_filepath(
-#                                 f"{pred_path}{vector_dim}/{normalization}/{n_component}/{covariance_type}/{model_num}.npy"
-#                             ),
-#                             pred,
-#                         )
