@@ -152,3 +152,8 @@ cd
 cd
 ssh -T github -vvv
 ssh
+/usr/bin/python3 -m pip install -U mypy
+pip show numpy
+pip show boto3
+pip install boto3
+pip install requests
