@@ -1,16 +1,10 @@
 config = {
     "data": {
-        "AgNews": {"class_num": [2, 4, 8, 16, 32]},
-        "AgNewsTitle": {
-            "class_num": [
-                2,
-                4,
-                8,
-                16,
-                32,
-            ]
-        },
+        "TweetTopic": {"class_num": [6]},
+        "AgNews": {"class_num": [4]},
+        "AgNewsTitle": {"class_num": [4]},
         "20News": {"class_num": [20]},
+        "TweetFinance": {"class_num": [20]},
     },
     "vectorize": {
         "doc2vec": {
@@ -54,10 +48,9 @@ data_type_re = {
     "20News": r"^20News",
     "AgNewsTitle": r"^AgNewsTitle",
     "AgNews": r"^AgNews",
+    "TweetTopic": r"^TweetTopic",
+    "TweetFinance": r"^TweetFinance",
 }
-
-
-
 
 
 # config = {
