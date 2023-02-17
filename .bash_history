@@ -157,3 +157,30 @@ pip show numpy
 pip show boto3
 pip install boto3
 pip install requests
+pip install jupyter_contrib_nbextensions
+jupyter contrib nbextension install --user
+jupyter nbextension enable varInspector/main
+jupyter nbextension disable varInspector/main
+jupyter contrib nbextension install --system 
+jupyter nbextension install https://github.com/drillan/jupyter-black/archive/master.zip
+jupyter nbextension install https://github.com/benjaminabel/jupyter-isort/archive/master.zip
+jupyter nbextension enable jupyter-black-master/jupyter-black
+jupyter nbextension enable jupyter-isort-master/jupyter-isort
+jupyter nbextension enable collapsible_headings/main
+jupyter nbextension enable contrib_nbextensions_help_item/main
+jupyter nbextension enable execute_time/ExecuteTime
+jupyter nbextension enable highlight_selected_word/main
+jupyter nbextension enable keyboard_shortcut_editor/main
+jupyter nbextension enable notify/notify
+jupyter nbextension enable spellchecker/main 
+jupyter nbextension enable toc2/main
+jupyter nbextension enable freeze/main
+jupyter nbextension enable autosavetime
+jupyter nbextension enable autosavetime
+jupyter nbextension enable autosavetime
+jupyter nbextension enable autosavetime/main
+jupyter nbextension install --py cellfolding --user
+jupyter nbextension enable --py cellfolding --user 
+jupyter nbextension enable codefolding/main
+jupyter nbextension enable hinterland/hinterland
+jupyter nbextension enable scratchpad/main
