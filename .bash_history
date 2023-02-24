@@ -81,38 +81,20 @@ bash RunMultiCoreGMM
 bash RunMultiCoreGMM 
 htop
 jobs
-git
-git init
-git remote add origin
-git remote add origin https://github.com/YuriNakayama/TextClassificationCode.git
-git remote
-git init
-git remote add origin https://github.com/YuriNakayama/TextClassificationCode.git
-ssh git
-ssh github
-ssh git@github
-ssh -T github
-ssh -T github -vvv
-ssh
-cd
+git add .
+git commit -m "1/15"
+git push TextClassificationCode
 ls
-ls -a
+cd Clustering/
 ls
-git remote
-ssh 
-cd ~/.ssh
-cd /
+cd Preprocessing/
 ls
-la -a
-ls -a
-ssh -T github -vvv
-cd ~
+bash RunCentralizeNormalizeTweet.sh 
+cd ..
 ls
-ls -a
-mkdir .ssh
+cd GMM
 ls
-ls -a
-cd .ssh
+cd ShellScript/
 ls
 ssh -T github -vvv
 ssh -T github -vvv
