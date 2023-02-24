@@ -33,9 +33,9 @@ pd.set_option("display.max_rows", 50)
 
 s3 = S3Manager()
 
-data_type = "20NewsSampled1"  # sys.argv[1]
-vectorize_type = "sentenceBERT"  # sys.argv[2]
-transformer_model = "sentence-transformers/all-MiniLM-L6-v2"  # sys.argv[3]
+data_type = sys.argv[1]
+vectorize_type =  sys.argv[2]
+transformer_model = sys.argv[3]
 
 # +
 vector_dims = config["vectorize"][vectorize_type][transformer_model]["dims"]
@@ -182,17 +182,13 @@ for vector_model_num, vector_dim, normalization in tqdm(
             for _name, _value in [pred, prob, dist]:
                 save_path = f"{value_path}/{_name}/{vector_dim}/{normalization}/{vector_model_num}/{covariance_type}/{topic_num}/{model_num}.npy"
                 np.save(make_filepath(save_path), _value)
-            for _name, _value in dict(stat):
-                save_path = f"{value_path}/{_name}/{vector_dim}/{normalization}/{vector_model_num}/{covariance_type}/{topic_num}/{model_num}.npy"
             
-
-stat
-
-pred, prob, dist, *_stat = values.items()
-
-dict(_stat)
-
-field_names = ["stats", "values"]
+            stat_path = f"{value_path}/stat/{vector_dim}/{normalization}/{vector_model_num}/{covariance_type}/{topic_num}/{model_num}.csv"
+            with open(make_filepath(stat_path), "w") as f:
+                writer = csv.DictWriter(f, dict(stat).keys())
+                writer.writeheader()
+                writer.writerow(dict(stat))
+            
 
 # ## upload file
 
