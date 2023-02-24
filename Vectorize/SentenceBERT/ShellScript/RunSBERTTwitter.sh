@@ -1,11 +1,14 @@
 data_types=(
-    "TweetTopic"
-    "TweetFinance" 
+    # "TweetTopic"
+    # "TweetFinance"
+    "AgNews"
+    "AgNewsTitle"
+    "20News" 
     )
 
 transformer_models=(
-    sentence-transformers/all-MiniLM-L6-v2
-    sentence-transformers/all-mpnet-base-v2
+    # sentence-transformers/all-MiniLM-L6-v2
+    # sentence-transformers/all-mpnet-base-v2
     sentence-transformers/all-distilroberta-v1
 )
 
