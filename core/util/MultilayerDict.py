@@ -4,7 +4,7 @@
 import copy
 import itertools
 import os
-from typing import List, Dict
+from typing import List, Dict, Type
 
 from sympy.combinatorics import Permutation
 # -
@@ -15,28 +15,39 @@ from sympy.combinatorics import Permutation
 # ## multilayer dict
 
 class MultilayerDict:
+    """
+    MultilayerDict
+    """
+    names: List
+    names_keys: Dict
+    dictionary: Dict
     def __init__(
         self,
         names_keys: Dict | None = None,
+        dictionary: Dict | None = None,
         dir_path: str | None = None,
         names: List | None = None,
         extension: str = "csv",
         basis_depth: str = "max",
-    ):
+    ): 
         if names_keys is not None:
-            self.dict = self.make_multilayer_dict(list(names_keys.values()))
             self.names = list(names_keys.keys())
             self.names_keys = names_keys
+            if dictionary is not None:
+                self.dictionary = dictionary
+            else:
+                self.dictionary = self.make_multilayer_dict(list(names_keys.values()))
         elif dir_path is not None:
-            self.dict, _keys, self.names = self.read_dirs(
+            self.dictionary, _keys, self.names = self.read_dirs(
                 dir_path,
                 names=names,
             )
         else:
             raise ValueError("Both names_keys and dir_path are None.")
 
+    
     def make_multilayer_dict(self, keys: List):
-        def _multilayer_dict_recursive(_d: dict, _keys: list):
+        def _multilayer_dict_recursive(_d: Dict, _keys: List):
             if not _keys:
                 return _d, []
             else:
@@ -57,10 +68,10 @@ class MultilayerDict:
             else:
                 return _loc_recursive(_val[_key_list[0]], _key_list[1:])
 
-        return _loc_recursive(self.dict, key_list)
+        return _loc_recursive(self.dictionary, key_list)
 
-    def update(self, key_list: List, val):
-        _d = self.dict
+    def update(self, key_list: List, val)->None:
+        _d = self.dictionary
         for key in key_list[:-1]:
             _d = _d[key]
         _d[key_list[-1]] = val
@@ -156,6 +167,22 @@ class MultilayerDict:
                 )
 
         return _md, _keys, _names
+    
+    def extend(self, keys: List[List[int]], mds: List):
+        if len(keys) != np.prod([len(_keys) for _keys in self.names_keys.values()]):
+            raise ValueError(
+                "The number of MultilayerDict and size of object do not match."
+            )
+        if len(keys) != len(mds):
+            raise ValueError("number of keys and mds do not match.")
+
+        # dictionary
+        for _keys, _md in zip(keys, mds):
+            self.update(_keys, _md.dictionary)
+        # namesを延長
+        self.names.extend(mds[0].names)
+        # keysを延長
+        self.names_keys.update(mds[0].names_keys)
 
 
 def swap_keys(old_multi_dict, new_names: list):
@@ -207,5 +234,31 @@ def swap_keys(old_multi_dict, new_names: list):
     return _new_multilayer_dict
 
 
-
-
+def read_csv(
+    file_path: str, names_keys: str, encoding: str="utf8", newline: str="", delimiter: str=",", quotechar: str="|"
+):
+    if len(names_keys) == 2:
+        with open(file_path, mode="r", encoding=encoding, newline=newline) as _f:
+            _dict = dict(
+                zip(
+                    list(names_keys.values())[0],
+                    csv.DictReader(
+                        _f,
+                        delimiter=delimiter,
+                        quotechar=quotechar,
+                        fieldnames=list(names_keys.values())[1],
+                    ),
+                )
+            )
+        return MultilayerDict(names_keys, _dict)
+    elif len(names_keys) == 1:
+        with open(file_path, mode="r", encoding=encoding, newline=newline) as _f:
+            _dict = csv.DictReader(
+                        _f,
+                        delimiter=delimiter,
+                        quotechar=quotechar,
+                        fieldnames=list(names_keys.values())[0],
+                    )
+        return MultilayerDict(names_keys, _dict)
+    else:
+        raise NotImplementedError("length of names_keys must be 1 or 2 ")
