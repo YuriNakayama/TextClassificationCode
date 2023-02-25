@@ -5,7 +5,7 @@ import copy
 import csv
 import itertools
 import os
-from typing import Dict, List, Type
+from typing import Dict, List, Tuple, Type
 
 import numpy as np
 from sympy.combinatorics import Permutation

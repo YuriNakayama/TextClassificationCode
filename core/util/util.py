@@ -9,6 +9,7 @@ import sys
 from itertools import chain
 from typing import List
 
+import pandas as pd
 import boto3
 import requests
 from botocore.exceptions import ClientError
@@ -53,13 +54,14 @@ def make_filepath(path):
 # ## statistics function
 
 
-def get_describe(df, axis=0):
+def get_describe(df: pd.DataFrame, axis: int = 0, return_dict: bool = False):
     """
     pd.DataFrameの統計値を取得する。
     Parameters
     ----------
     df : pd.DataFrame
     axis : 0, 1
+    return_dict: if true, it return dict, else return pd.Series
     Returns
     -------
     describe : dict(pd.Series)
@@ -75,6 +77,8 @@ def get_describe(df, axis=0):
         "75": df.quantile(0.75, axis=axis),
         "25": df.quantile(0.25, axis=axis),
     }
+    if return_dict:
+        describe = {_key: _value.to_dict() for _key, _value in describe.items()}
     keys = describe.keys()
     return describe, keys
 
