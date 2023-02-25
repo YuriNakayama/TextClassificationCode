@@ -263,7 +263,7 @@ class S3Manager:
                 if os.path.isfile(_path):
                     os.remove(_path)
                 else:
-                    shutil.rmtree(_path)
+                    shutil.rmtree(_path, ignore_errors=False)
                 return True
             else:
                 return False
@@ -285,7 +285,7 @@ class S3Manager:
                 if os.path.isfile(_path):
                     os.remove(_path)
                 else:
-                    shutil.rmtree(_path)
+                    shutil.rmtree(_path, ignore_errors=False)
                 return True
             else:
                 return False

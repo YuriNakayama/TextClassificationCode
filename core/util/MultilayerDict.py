@@ -2,10 +2,12 @@
 
 # +
 import copy
+import csv
 import itertools
 import os
-from typing import List, Dict, Type
+from typing import Dict, List, Type
 
+import numpy as np
 from sympy.combinatorics import Permutation
 # -
 
@@ -18,9 +20,11 @@ class MultilayerDict:
     """
     MultilayerDict
     """
+
     names: List
     names_keys: Dict
     dictionary: Dict
+
     def __init__(
         self,
         names_keys: Dict | None = None,
@@ -29,7 +33,7 @@ class MultilayerDict:
         names: List | None = None,
         extension: str = "csv",
         basis_depth: str = "max",
-    ): 
+    ):
         if names_keys is not None:
             self.names = list(names_keys.keys())
             self.names_keys = names_keys
@@ -45,7 +49,18 @@ class MultilayerDict:
         else:
             raise ValueError("Both names_keys and dir_path are None.")
 
-    
+    def __check_all_none(self, *args) -> bool:
+        if all(_v is None for _v in args):
+            return True
+        else:
+            return False
+
+    def __check_one_not_none(self, *args) -> bool:
+        if sum(1 for arg in args if arg is not None) == 1:
+            return True
+        else:
+            return False
+
     def make_multilayer_dict(self, keys: List):
         def _multilayer_dict_recursive(_d: Dict, _keys: List):
             if not _keys:
@@ -58,8 +73,19 @@ class MultilayerDict:
         _multilayer_dict, _ = _multilayer_dict_recursive(dict(), keys)
         return _multilayer_dict
 
-    def name_is_in(self, name):
+    def name_is_in(self, name) -> bool:
         return name in self.name
+
+    def keys_exist(self, keys: List | Tuple) -> bool:
+        def __is_accessible(_d: Dict, _t: List | Tuple) -> bool:
+            if len(_t) == 1:
+                return _t[0] in _d
+            if _t[0] in _d:
+                return __is_accessible(_d[_t[0]], _t[1:])
+            else:
+                return False
+
+        return __is_accessible(self.dictionary, keys)
 
     def loc(self, key_list: List):
         def _loc_recursive(_val, _key_list: list):
@@ -70,56 +96,57 @@ class MultilayerDict:
 
         return _loc_recursive(self.dictionary, key_list)
 
-    def update(self, key_list: List, val)->None:
+    def update(self, key_list: List, val) -> None:
         _d = self.dictionary
         for key in key_list[:-1]:
             _d = _d[key]
         _d[key_list[-1]] = val
 
-    def _one_dimensional_csv_to_dict(
-        file_path, encoding="utf8", newline="", delimiter=",", quotechar="|"
-    ):
-        with open(file_path, mode="r", encoding=encoding, newline=newline) as _f:
-            _reader = csv.reader(_f, delimiter=delimiter, quotechar=quotechar)
-            _dict = dict(_reader)
-        return _dict
-
-    def _one_dimensional_json_to_dict(
-        file_path,
-        encoding="utf8",
-        newline="",
-    ):
-        with open(file_path, mode="r", encoding=encoding, newline=newline) as _f:
-            _dict = json.load(_f)
-        return _dict
-
     def read_dirs(self, dir_path, names=None, extension="csv", basis_depth="max"):
-        def _get_uniform_dirs(_path_dirs, _basis_depth):
+        def _one_dimensional_csv_to_dict(
+            file_path, encoding="utf8", newline="", delimiter=",", quotechar="|"
+        ):
+            print(file_path)
+            with open(file_path, mode="r", encoding=encoding, newline=newline) as _f:
+                _reader = csv.reader(_f, delimiter=delimiter, quotechar=quotechar)
+                _dict = dict(_reader)
+            return _dict
+
+        def _one_dimensional_json_to_dict(
+            file_path,
+            encoding="utf8",
+            newline="",
+        ):
+            with open(file_path, mode="r", encoding=encoding, newline=newline) as _f:
+                _dict = json.load(_f)
+            return _dict
+
+        def _get_uniform_dirs(__path_dirs, _basis_depth):
             # 最も深いパスを基準にMultilayerDictを生成する
             if _basis_depth == "max":
-                _depth = max(map(len, _path_dirs.values()))
+                _depth = max(map(len, __path_dirs.values()))
                 _uniform_dirs = {
                     _path: _dir
-                    for _path, _dir in _path_dirs.items()
+                    for _path, _dir in __path_dirs.items()
                     if len(_dir) == _depth
                 }
-                return _depth, _unifrom_dirs
+                return _depth, _uniform_dirs
             elif _basis_depth == "min":
-                _depth = min(map(len, _path_dirs.values()))
+                _depth = min(map(len, __path_dirs.values()))
                 _uniform_dirs = {
                     _path: _dir
-                    for _path, _dir in _path_dirs.items()
+                    for _path, _dir in __path_dirs.items()
                     if len(_dir) == _depth
                 }
-                return _depth, _unifrom_dirs
+                return _depth, _uniform_dirs
             elif isinstance(_basis_depth, int) & (_basis_depth > 0):
                 _depth = _basis_depth
                 _uniform_dirs = {
                     _path: _dir
-                    for _path, _dir in _path_dirs.items()
+                    for _path, _dir in __path_dirs.items()
                     if len(_dir) == _depth
                 }
-                return _depth, _unifrom_dirs
+                return _depth, _uniform_dirs
             else:
                 raise NotImplementedError
 
@@ -135,25 +162,26 @@ class MultilayerDict:
                         _file_path.replace(_abs_dir_path, "")
                     ).split("/")[1:]
 
-        _path_dirs, _depth = _get_uniform_dirs(_dirs, basis_depth)
+        _depth, _uniform_path_dirs = _get_uniform_dirs(_path_dirs, basis_depth)
 
-        _md = make_multilayer_dict(_names)
         # ファイルの読み込み
         _file_keys = set()
         if extension == "csv":
-            for _path, _dir_list in _path_dirs.items():
+            for _path, _dir_list in _uniform_path_dirs.items():
+                print(_path)
+                print(_dir_list)
                 _file_dict = _one_dimensional_csv_to_dict(_path)
                 md.update(_dir_list, _file_dict)
                 _file_keys = _file_keys & set(_file_dict)
         elif extension == "json":
-            for _path, _dir_list in _path_dirs.items():
+            for _path, _dir_list in _uniform_path_dirs.items():
                 _file_dict = _one_dimensional_json_to_dict(_path)
                 md.update(_dir_list, _file_dict)
                 _file_keys = _file_keys & set(_file_dict)
         else:
             raise NotImplementedError
 
-        _keys = [list(set(_)) for _ in zip(*_path_dirs.values())]
+        _keys = [list(set(_)) for _ in zip(*_uniform_path_dirs.values())]
         _keys.append(_file_keys)
 
         if names:
@@ -165,10 +193,77 @@ class MultilayerDict:
                 raise ValueError(
                     f"length mismatch. basis_depth is {basis_depth}, but length of name is {len(names)}."
                 )
-
+        _md = self.make_multilayer_dict(_names)
         return _md, _keys, _names
-    
-    def extend(self, keys: List[List[int]], mds: List):
+
+    def drop_names(
+        self, names: List | None = None, loc: int | None = None, inplace: bool = False
+    ):
+        if self.__check_all_none(names, loc):
+            raise ValueError("At least one argument must not be None.")
+
+        if not self.__check_one_not_none(names, loc):
+            raise ValueError("Multiple variables are specified.")
+
+        if names is not None:
+            if self.names[-len(names) :] != names:
+                raise ValueError(
+                    f"The given names ({names}) do not match the variable ({self.names})."
+                )
+            if inplace:
+                self.names = [_ for _ in self.names[: -len(names)]]
+                self.names_keys = {
+                    _name: _val
+                    for _name, _val in self.names_keys.items()
+                    if _name in self.names
+                }
+            else:
+                _names = [_ for _ in self.names[: -len(names)]]
+                _names_keys = {
+                    _name: _val
+                    for _name, _val in self.names_keys.items()
+                    if _name in _names
+                }
+                _dictionary = copy.deepcopy(self.dictionary)
+                return MultilayerDict(_names_keys, _dictionary)
+
+        elif loc is not None:
+            if len(self.names_keys) < loc:
+                raise ValueError(
+                    f"Value of loc ({loc}) exceed length of names ({len(self.names_keys)})"
+                )
+            if inplace:
+                self.names = [_ for _ in self.names[:-loc]]
+                self.names_keys = {
+                    _name: _val
+                    for _name, _val in self.names_keys.items()
+                    if _name in self.names
+                }
+            else:
+                _names = [_ for _ in self.names[:-loc]]
+                _names_keys = {
+                    _name: _val
+                    for _name, _val in self.names_keys.items()
+                    if _name in _names
+                }
+                _dictionary = copy.deepcopy(self.dictionary)
+                return MultilayerDict(_names_keys, _dictionary)
+
+        else:
+            raise NotImplementedError
+
+    def add_names(self, names_keys: Dict, inplace: bool = False):
+        _new_names_keys = dict(**self.names_keys, **names_keys)
+        for _keys in itertools.product(*_new_names_keys.values()):
+            if not self.keys_exist(_keys):
+                raise KeyError(f"The key does not exist {_keys}.")
+        if inplace:
+            self.names_keys = _new_names_keys
+            self.names = list(_new_names_keys.keys())
+        else:
+            return MultilayerDict(_new_names_keys, self.dictionary)
+
+    def extend(self, keys: List[List[int]], mds: List, inplace: bool = False):
         if len(keys) != np.prod([len(_keys) for _keys in self.names_keys.values()]):
             raise ValueError(
                 "The number of MultilayerDict and size of object do not match."
@@ -176,13 +271,24 @@ class MultilayerDict:
         if len(keys) != len(mds):
             raise ValueError("number of keys and mds do not match.")
 
-        # dictionary
-        for _keys, _md in zip(keys, mds):
-            self.update(_keys, _md.dictionary)
-        # namesを延長
-        self.names.extend(mds[0].names)
-        # keysを延長
-        self.names_keys.update(mds[0].names_keys)
+        if inplace:
+            # dictionary
+            for _keys, _md in zip(keys, mds):
+                self.update(_keys, _md.dictionary)
+            # namesを延長
+            self.names.extend(mds[0].names)
+            # keysを延長
+            self.names_keys.update(mds[0].names_keys)
+        else:
+            md_return = copy.deepcopy(self)
+            # dictionary
+            for _keys, _md in zip(keys, mds):
+                md_return.update(_keys, _md.dictionary)
+            # namesを延長
+            md_return.names.extend(mds[0].names)
+            # keysを延長
+            md_return.names_keys.update(mds[0].names_keys)
+            return md_return
 
 
 def swap_keys(old_multi_dict, new_names: list):
@@ -235,7 +341,12 @@ def swap_keys(old_multi_dict, new_names: list):
 
 
 def read_csv(
-    file_path: str, names_keys: str, encoding: str="utf8", newline: str="", delimiter: str=",", quotechar: str="|"
+    file_path: str,
+    names_keys: Dict,
+    encoding: str = "utf8",
+    newline: str = "",
+    delimiter: str = ",",
+    quotechar: str = "|",
 ):
     if len(names_keys) == 2:
         with open(file_path, mode="r", encoding=encoding, newline=newline) as _f:
@@ -253,12 +364,13 @@ def read_csv(
         return MultilayerDict(names_keys, _dict)
     elif len(names_keys) == 1:
         with open(file_path, mode="r", encoding=encoding, newline=newline) as _f:
-            _dict = csv.DictReader(
-                        _f,
-                        delimiter=delimiter,
-                        quotechar=quotechar,
-                        fieldnames=list(names_keys.values())[0],
-                    )
+            _dict = list(
+                csv.DictReader(
+                    _f,
+                    delimiter=delimiter,
+                    quotechar=quotechar,
+                )
+            )[0]
         return MultilayerDict(names_keys, _dict)
     else:
         raise NotImplementedError("length of names_keys must be 1 or 2 ")

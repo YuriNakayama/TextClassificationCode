@@ -19,7 +19,7 @@ from tqdm import tqdm
 
 sys.path.append("/home/jovyan/core/config/")
 sys.path.append("/home/jovyan/core/util/")
-sys.path.append("../Function/")
+sys.path.append("/home/jovyan/Postprocessing/Function/")
 
 from ALL import config 
 from util import *
