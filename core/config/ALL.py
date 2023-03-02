@@ -41,6 +41,12 @@ config = {
         "LDA": {
             "max_model_num": 20,
         },
+        "BERTopic": {
+            "max_model_num": 1
+        },
+        "biterm": {
+            "max_model_num":1
+        }
     },
 }
 

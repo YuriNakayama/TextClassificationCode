@@ -9,6 +9,7 @@
 *.pickle
 *.png
 *.png
+*.pyc
 *.xml
 *.zip
 *.model
@@ -28,7 +29,7 @@
 .ssh
 .vscode-server
 
-
+etmenv
 data
 models
 nltk_data

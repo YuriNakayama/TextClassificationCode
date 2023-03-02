@@ -19,7 +19,7 @@ from tqdm import tqdm
 
 sys.path.append("/home/jovyan/core/config/")
 sys.path.append("/home/jovyan/core/util/")
-sys.path.append("../Function/")
+sys.path.append("/home/jovyan/Postprocessing/Function/")
 
 from ALL import config 
 from util import *
@@ -188,7 +188,7 @@ for vector_model_num, vector_dim, normalization in tqdm(
                 writer = csv.DictWriter(f, dict(stat).keys())
                 writer.writeheader()
                 writer.writerow(dict(stat))
-            
+
 
 # ## upload file
 

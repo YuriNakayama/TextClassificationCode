@@ -8,8 +8,6 @@ import sys
 
 import numpy as np
 import pandas as pd
-import pyLDAvis
-import pyLDAvis.gensim_models as gensimvis
 from gensim.corpora.dictionary import Dictionary
 from gensim.models.ldamodel import LdaModel
 from smart_open import open
@@ -50,8 +48,6 @@ with open(labels_path[0], mode="r") as f:
     reader = csv.reader(f)
     class_labels = [label for label in reader]
 
-s3.download(vectors_path)
-
 
 # # LDA
 
@@ -80,9 +76,9 @@ corpus = Corpus(texts=texts)
 dictionary = Dictionary(texts)
 dictionary.filter_extremes()
 
-os.makedirs(os.path.dirname(f"../../temporary/{data_type}/LDA/"), exist_ok=True)
-pickle.dump(dictionary, open(f"../../temporary/{data_type}/LDA/dictionary.sav", "wb"))
-pickle.dump(corpus, open(f"../../temporary/{data_type}/LDA/corpus.sav", "wb"))
+os.makedirs(os.path.dirname(f"{root_path_temporary}temporary/{data_type}/LDA/"), exist_ok=True)
+pickle.dump(dictionary, open(f"{root_path_temporary}temporary/{data_type}/LDA/dictionary.sav", "wb"))
+pickle.dump(corpus, open(f"{root_path_temporary}temporary/{data_type}/LDA/corpus.sav", "wb"))
 
 label = df["class"].to_numpy()
 
@@ -104,15 +100,15 @@ def getLDA(corpus,dictionary, n_components, seed, path):
 
 
 # +
-models_path = f"../../temporary/Clustering/{data_type}/LDA/model/"
-pred_path = f"../../temporary/Clustering/{data_type}/LDA/pred/"
-prob_path = f"../../temporary/Clustering/{data_type}/LDA/prob/"
+models_path = f"{root_path_temporary}temporary/Clustering/{data_type}/LDA/model/"
+pred_path = f"{root_path_temporary}temporary/Clustering/{data_type}/LDA/pred/"
+prob_path = f"{root_path_temporary}temporary/Clustering/{data_type}/LDA/prob/"
 
 for model_num in tqdm(range(model_nums)):
     prob, lda = getLDA(
         corpus=corpus,
         dictionary=dictionary,
-        n_components=n_conmponents,
+        n_components=n_components[0],
         seed=model_num,
         path=f"{models_path}{model_num}"
     )
@@ -130,11 +126,11 @@ for model_num in tqdm(range(model_nums)):
 # ## upload file
 
 s3.upload(
-    f"../../temporary/Clustering/{data_type}/LDA/", 
+    f"{root_path_temporary}temporary/Clustering/{data_type}/LDA/", 
 )
 
 s3.delete_local_all()
 
-send_line_notify(f"end {data_type} LDA")
+send_line_notify(f"LDA.py {data_type} LDA")
 
 
