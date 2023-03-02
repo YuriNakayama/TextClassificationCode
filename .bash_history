@@ -166,3 +166,21 @@ jupyter nbextension enable --py cellfolding --user
 jupyter nbextension enable codefolding/main
 jupyter nbextension enable hinterland/hinterland
 jupyter nbextension enable scratchpad/main
+df -h
+htop
+git add.
+git add 
+git add .
+git commit -m ""
+git push origin
+ls
+ls
+cd Postprocessing/
+ls
+cd GMM
+ls
+cd ShellScript/
+ls
+bash RunCalcStatsSampled.sh 
+df -h
+df -h

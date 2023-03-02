@@ -188,7 +188,7 @@ for vector_model_num, vector_dim, normalization in tqdm(
                 writer = csv.DictWriter(f, dict(stat).keys())
                 writer.writeheader()
                 writer.writerow(dict(stat))
-            
+
 
 # ## upload file
 
