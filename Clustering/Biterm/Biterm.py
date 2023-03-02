@@ -20,8 +20,6 @@ from biterm.utility import topic_summuary, vec_to_biterms  # helper functions
 
 sys.path.append("/home/jovyan/core/config/")
 sys.path.append("/home/jovyan/core/util/")
-sys.path.append("../PlotFunction/lineplot/")
-sys.path.append("../PlotFunction/config/")
 
 from ALL import config
 from util import *
@@ -126,7 +124,7 @@ np.save(make_filepath(pred_path), pred_path)
 # # Upload
 
 s3.upload(
-    f"/home/jovyan/temporary/Clustering/{data_type}/biterm/"
+    f"/home/jovyan/temporary/Clustering/{data_type}/biterm"
 )
 
 s3.delete_local_all()
