@@ -1,4 +1,4 @@
-# TextClassificationCode\
+# TextClassificationCode
 
 AgTitleのテキスト分類は以下の手続で、ファイルを順次実行する。\
 Uploadと以下のセルはデータをローカル環境で管理する場合は実行しなくてよい。\
