@@ -1,7 +1,7 @@
-# TextClassificationCode
+# TextClassificationCode\
 
-AgTitleのテキスト分類は以下の手続で、ファイルを順次実行する。
-Uploadと以下のセルはデータをローカル環境で管理する場合は実行しなくてよい。
+AgTitleのテキスト分類は以下の手続で、ファイルを順次実行する。\
+Uploadと以下のセルはデータをローカル環境で管理する場合は実行しなくてよい。\
 なお、実行ファイルと同じディレクトリにShellScriptがある場合は、それをbashで実行することもできる。ただし、config/All.pyで指定されたパラメータで実行される。
 
 
