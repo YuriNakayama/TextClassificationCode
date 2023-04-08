@@ -76,9 +76,9 @@ corpus = Corpus(texts=texts)
 dictionary = Dictionary(texts)
 dictionary.filter_extremes()
 
-os.makedirs(os.path.dirname(f"{root_path_temporary}temporary/{data_type}/LDA/"), exist_ok=True)
-pickle.dump(dictionary, open(f"{root_path_temporary}temporary/{data_type}/LDA/dictionary.sav", "wb"))
-pickle.dump(corpus, open(f"{root_path_temporary}temporary/{data_type}/LDA/corpus.sav", "wb"))
+os.makedirs(os.path.dirname(f"{root_path_temporary}Clustering/{data_type}/LDA/"), exist_ok=True)
+pickle.dump(dictionary, open(f"{root_path_temporary}Clustering/{data_type}/LDA/dictionary.sav", "wb"))
+pickle.dump(corpus, open(f"{root_path_temporary}Clustering/{data_type}/LDA/corpus.sav", "wb"))
 
 label = df["class"].to_numpy()
 
@@ -100,9 +100,9 @@ def getLDA(corpus,dictionary, n_components, seed, path):
 
 
 # +
-models_path = f"{root_path_temporary}temporary/Clustering/{data_type}/LDA/model/"
-pred_path = f"{root_path_temporary}temporary/Clustering/{data_type}/LDA/pred/"
-prob_path = f"{root_path_temporary}temporary/Clustering/{data_type}/LDA/prob/"
+models_path = f"{root_path_temporary}Clustering/{data_type}/LDA/model/"
+pred_path = f"{root_path_temporary}Clustering/{data_type}/LDA/pred/"
+prob_path = f"{root_path_temporary}Clustering/{data_type}/LDA/prob/"
 
 for model_num in tqdm(range(model_nums)):
     prob, lda = getLDA(
@@ -110,7 +110,7 @@ for model_num in tqdm(range(model_nums)):
         dictionary=dictionary,
         n_components=n_components[0],
         seed=model_num,
-        path=f"{models_path}{model_num}"
+        path=f"{models_path}{model_num}/{model_num}"
     )
 #     save prediction
     probDf = pd.DataFrame([dict(row) for row in prob]).fillna(0)
@@ -126,7 +126,7 @@ for model_num in tqdm(range(model_nums)):
 # ## upload file
 
 s3.upload(
-    f"{root_path_temporary}temporary/Clustering/{data_type}/LDA/", 
+    f"{root_path_temporary}Clustering/{data_type}/LDA", 
 )
 
 s3.delete_local_all()

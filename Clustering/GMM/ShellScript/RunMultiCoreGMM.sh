@@ -1,9 +1,9 @@
 data_types=(
-    "TweetTopic"
-    "TweetFinance" 
-    # "AgNews"
-    # "AgNewsTitle"
-    # "20News"
+    # "TweetTopic"
+    # "TweetFinance" 
+    "AgNews"
+    "AgNewsTitle"
+    "20News"
     )
 
 transformer_models=(
